@@ -1,0 +1,11 @@
+{
+  "company_name": "Supply Chain Co",
+  "revenue_per_day": 500000,
+  "sla_penalty_per_day": 100000,
+  "inventory_days": {
+    "IC-7NM-001": 30,
+    "MECH-VALVE-202": 50,
+    "AUTO-HARNESS-X": 120
+  },
+  "critical_parts": ["IC-7NM-001", "MECH-VALVE-202", "AUTO-HARNESS-X"]
+}

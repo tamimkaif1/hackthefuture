@@ -1,0 +1,17 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+.env
+.env.*
+
+.cursor/
+.vscode/
+.idea/
+
+memory_chunks.json
+pending_actions.json
+
+terminals/
+
