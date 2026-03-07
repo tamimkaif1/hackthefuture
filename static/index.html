@@ -4,232 +4,394 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Supply Chain Resilience Agent</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-    <div class="blob blob-1"></div>
-    <div class="blob blob-2"></div>
-    <div class="app-container">
-        
-        <aside class="sidebar glass">
-            <div class="logo">
-                <i class="fa-solid fa-link"></i>
-                <h2>SupplyAgent</h2>
+    <div class="ambient ambient-a"></div>
+    <div class="ambient ambient-b"></div>
+    <div class="ambient ambient-c"></div>
+
+    <div class="app-shell">
+        <aside class="sidebar shell-panel">
+            <div class="brand-block">
+                <div class="brand-icon"><i class="fa-solid fa-link"></i></div>
+                <div>
+                    <p class="eyebrow">Operations AI</p>
+                    <h2 class="brand-title">SupplyAgent</h2>
+                </div>
             </div>
-            
+
+            <div class="sidebar-meta">
+                <div class="meta-card">
+                    <span class="meta-label">Mode</span>
+                    <strong>Human Review Enabled</strong>
+                </div>
+                <div class="meta-card">
+                    <span class="meta-label">Scenario</span>
+                    <strong>Live disruption cycle</strong>
+                </div>
+            </div>
+
             <ul class="steps-nav" id="steps-nav">
                 <li class="step active" data-step="1">
                     <div class="step-icon"><i class="fa-solid fa-satellite-dish"></i></div>
-                    <div class="step-text">
+                    <div class="step-copy">
                         <span class="step-title">Perception</span>
                         <span class="step-desc">Signal ingestion</span>
                     </div>
+                    <span class="step-state">Live</span>
                 </li>
                 <li class="step" data-step="2">
                     <div class="step-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
-                    <div class="step-text">
+                    <div class="step-copy">
                         <span class="step-title">Risk Intel</span>
                         <span class="step-desc">Assess exposure</span>
                     </div>
+                    <span class="step-state">Queued</span>
                 </li>
                 <li class="step" data-step="3">
                     <div class="step-icon"><i class="fa-solid fa-chess-knight"></i></div>
-                    <div class="step-text">
+                    <div class="step-copy">
                         <span class="step-title">Planning</span>
                         <span class="step-desc">Mitigation options</span>
                     </div>
+                    <span class="step-state">Queued</span>
                 </li>
                 <li class="step" data-step="4">
                     <div class="step-icon"><i class="fa-solid fa-bolt"></i></div>
-                    <div class="step-text">
+                    <div class="step-copy">
                         <span class="step-title">Actions</span>
                         <span class="step-desc">Execute responses</span>
                     </div>
+                    <span class="step-state">Queued</span>
                 </li>
                 <li class="step" data-step="5">
                     <div class="step-icon"><i class="fa-solid fa-brain"></i></div>
-                    <div class="step-text">
+                    <div class="step-copy">
                         <span class="step-title">Memory</span>
                         <span class="step-desc">Reflect & learn</span>
                     </div>
+                    <span class="step-state">Queued</span>
                 </li>
                 <li class="step" data-step="6">
                     <div class="step-icon"><i class="fa-solid fa-shield-halved"></i></div>
-                    <div class="step-text">
+                    <div class="step-copy">
                         <span class="step-title">Transparency</span>
                         <span class="step-desc">Decision logic</span>
                     </div>
+                    <span class="step-state">Queued</span>
                 </li>
             </ul>
         </aside>
 
-        <main class="main-content glass">
-            <!-- Header -->
-            <header class="content-header">
+        <main class="workspace">
+            <header class="topbar shell-panel content-header">
                 <div>
+                    <p class="eyebrow">Autonomous command center</p>
                     <h1 id="current-step-title">1. Perception Layer</h1>
-                    <p id="current-step-desc" class="text-secondary">Ingesting news and building context from mock ERP.</p>
+                    <p id="current-step-desc" class="subheading">Ingesting news and building context from mock ERP.</p>
                 </div>
-                <div class="cycle-status">
-                    <span class="badge" id="cycle-badge">Cycle 1</span>
+                <div class="topbar-actions">
+                    <div class="pill pill-success"><i class="fa-solid fa-circle-check"></i> Human approval required</div>
+                    <div class="pill"><i class="fa-regular fa-clock"></i> <span id="cycle-badge">Cycle 1</span></div>
                 </div>
             </header>
 
-            <!-- Loading overlay -->
-            <div id="loader" class="loader-container hidden">
-                <div class="spinner"></div>
-                <p id="loader-text">Analyzing signals...</p>
-            </div>
-
-            <!-- Content Area -->
-            <div class="content-body" id="content-body">
-                <!-- Step 1 View -->
-                <div id="view-step-1" class="step-view active">
-                    <div class="info-card">
-                        <h3>Latest Signal</h3>
-                        <p id="s1-news" class="highlight-text">-</p>
-                    </div>
-                    <div class="grid-2">
-                        <div class="info-box">
-                            <h4>ERP Context</h4>
-                            <p id="s1-erp" class="stat">-</p>
+            <section class="hero-grid" id="hero-grid">
+                <div class="hero-card shell-panel">
+                    <div class="hero-header">
+                        <div>
+                            <p class="eyebrow">Latest signal</p>
+                            <h3 class="hero-title">Supply Chain Resilience Agent</h3>
                         </div>
-                        <div class="info-box">
-                            <h4>Supplier Health</h4>
-                            <p id="s1-health">-</p>
-                        </div>
+                        <div class="signal-chip"><i class="fa-solid fa-wave-square"></i> Monitoring</div>
                     </div>
-                    <div class="json-container">
-                        <h4>Risk Assessment Payload</h4>
-                        <pre id="s1-json">{}</pre>
-                    </div>
-                    <div class="action-bar">
-                        <button class="btn btn-primary" onclick="proceedToStep(2)">Approve & Proceed to Layer 2 <i class="fa-solid fa-arrow-right"></i></button>
+                    <p id="hero-description" class="hero-description">
+                        Detect disruption signals, quantify revenue exposure, compare mitigation options, and stage human-approved actions through a 6-layer workflow.
+                    </p>
+                    <div class="hero-actions">
+                        <button class="btn btn-primary btn-lg" onclick="startWizard()">
+                            Initialize Run <i class="fa-solid fa-play"></i>
+                        </button>
+                        <button class="btn btn-secondary" onclick="startNewCycle()">
+                            Demo Reset <i class="fa-solid fa-rotate-right"></i>
+                        </button>
                     </div>
                 </div>
 
-                <!-- Step 2 View -->
-                <div id="view-step-2" class="step-view">
-                    <div class="grid-3 mb-4">
-                        <div class="info-box border-warning">
-                            <h4>Risk Level</h4>
-                            <p id="s2-level" class="stat text-warning">-</p>
-                        </div>
-                        <div class="info-box">
-                            <h4>Revenue at Risk</h4>
-                            <p id="s2-rev" class="stat">-</p>
-                        </div>
-                        <div class="info-box">
-                            <h4>Downtime (Days)</h4>
-                            <p id="s2-down" class="stat">-</p>
-                        </div>
-                    </div>
-                    <div class="json-container">
-                        <h4>Risk Output</h4>
-                        <pre id="s2-json">{}</pre>
-                    </div>
-                    <div class="action-bar">
-                        <button class="btn btn-primary" onclick="proceedToStep(3)">Approve & Proceed to Layer 3 <i class="fa-solid fa-arrow-right"></i></button>
-                    </div>
+                <div class="kpi-card shell-panel">
+                    <p class="eyebrow">Review status</p>
+                    <div class="kpi-value">Manual Gate</div>
+                    <p class="kpi-copy">Every recommendation is paused for human approval before execution.</p>
                 </div>
 
-                <!-- Step 3 View -->
-                <div id="view-step-3" class="step-view">
-                    <div class="info-card mb-4">
-                        <h3>Mohid's Chosen Plan</h3>
-                        <div class="plan-hero">
-                            <h2 id="s3-chosen-plan" class="text-accent">-</h2>
-                            <p><strong>Cost:</strong> <span id="s3-cost">-</span></p>
-                            <p><strong>Reasoning:</strong> <span id="s3-reasoning">-</span></p>
-                        </div>
-                    </div>
-                    <h4>Tamim's Options Comparison</h4>
-                    <div class="options-grid" id="s3-options">
-                        <!-- Options populated via JS -->
-                    </div>
-                    <div class="action-bar">
-                        <button class="btn btn-primary" onclick="proceedToStep(4)">Approve Plan & Proceed to Layer 4 <i class="fa-solid fa-arrow-right"></i></button>
-                    </div>
+                <div class="kpi-card shell-panel">
+                    <p class="eyebrow">System posture</p>
+                    <div class="kpi-value">Live Demo</div>
+                    <p class="kpi-copy">Sequential agent flow across perception, risk, planning, action, memory, and transparency.</p>
+                </div>
+            </section>
+
+            <section class="main-panel shell-panel">
+                <div id="loader" class="loader-container hidden">
+                    <div class="spinner"></div>
+                    <p id="loader-text">Analyzing signals...</p>
                 </div>
 
-                <!-- Step 4 View -->
-                <div id="view-step-4" class="step-view">
-                    <div class="grid-2 mb-4">
-                        <div class="info-card">
-                            <h3>Executive Alert</h3>
-                            <div class="text-box" id="s4-alert">-</div>
-                        </div>
-                        <div class="info-card" id="s4-escalation-card" style="display:none;">
-                            <h3 class="text-warning"><i class="fa-solid fa-triangle-exclamation"></i> Escalation Trigger</h3>
-                            <div class="text-box border-warning" id="s4-escalation">-</div>
-                        </div>
-                    </div>
-                    <div class="info-card mb-4">
-                        <h3>Supplier Email Draft</h3>
-                        <div class="text-box" id="s4-email">-</div>
-                    </div>
-                    <div class="json-container">
-                        <h4>Integration Log</h4>
-                        <pre id="s4-log">[]</pre>
-                    </div>
-                    <div class="action-bar">
-                        <button class="btn btn-success" onclick="executeActions()"><i class="fa-solid fa-check-double"></i> Execute Actions</button>
-                    </div>
-                </div>
+                <div class="content-body" id="content-body">
+                    <div id="view-step-1" class="step-view">
+                        <div class="dashboard-grid">
+                            <div class="feature-card feature-primary">
+                                <div class="card-head">
+                                    <div>
+                                        <p class="eyebrow">Latest signal</p>
+                                        <h3>Disruption intake</h3>
+                                    </div>
+                                    <div class="card-icon"><i class="fa-solid fa-tower-broadcast"></i></div>
+                                </div>
+                                <p id="s1-news" class="feature-copy">-</p>
+                            </div>
 
-                <!-- Step 5 View -->
-                <div id="view-step-5" class="step-view">
-                    <div class="info-card success-card text-center mb-4">
-                        <div class="circle-icon mx-auto"><i class="fa-solid fa-check"></i></div>
-                        <h3>Memory & Reflection Completed</h3>
-                        <p class="text-secondary">The recent event has been analyzed, condensed, and saved to <code class="inline">memory_chunks.json</code> for future reference.</p>
-                    </div>
-                    <div class="action-bar justify-center">
-                        <button class="btn btn-primary" onclick="proceedToStep(6)">Proceed to Layer 6 <i class="fa-solid fa-arrow-right"></i></button>
-                    </div>
-                </div>
+                            <div class="feature-card compact-card">
+                                <p class="eyebrow">ERP context</p>
+                                <p id="s1-erp" class="metric-text">-</p>
+                            </div>
 
-                <!-- Step 6 View -->
-                <div id="view-step-6" class="step-view">
-                    <div class="info-card mb-4">
-                        <h3>Reasoning Trace</h3>
-                        <p id="s6-trace" class="text-secondary">-</p>
-                    </div>
-                    <div class="grid-2 mb-4">
-                        <div class="info-box">
-                            <h4>Human Override Threshold</h4>
-                            <p id="s6-threshold">-</p>
+                            <div class="feature-card compact-card">
+                                <p class="eyebrow">Supplier health</p>
+                                <p id="s1-health" class="metric-text">-</p>
+                            </div>
                         </div>
-                        <div class="info-box">
-                            <h4>Constraint Validation</h4>
-                            <ul id="s6-validation" class="bullet-list"></ul>
+
+                        <div class="payload-card shell-inset">
+                            <div class="section-head">
+                                <div>
+                                    <p class="eyebrow">Layer output</p>
+                                    <h3>Risk Assessment Payload</h3>
+                                </div>
+                                <div class="pill pill-outline">Structured JSON</div>
+                            </div>
+                            <pre id="s1-json" class="code-block">{}</pre>
+                        </div>
+
+                        <div class="action-bar">
+                            <button class="btn btn-primary" onclick="proceedToStep(2)">Approve & Proceed to Layer 2 <i class="fa-solid fa-arrow-right"></i></button>
                         </div>
                     </div>
-                    <div class="info-box mb-4">
-                        <h4>Assumptions Built</h4>
-                        <ul id="s6-assumptions" class="bullet-list"></ul>
-                    </div>
-                    <div class="action-bar justify-center">
-                        <button class="btn btn-accent" onclick="startNewCycle()"><i class="fa-solid fa-rotate-right"></i> Start Next Cycle</button>
-                    </div>
-                </div>
-                
-                <!-- Welcome View -->
-                <div id="view-welcome" class="step-view active text-center flex-center h-full">
-                    <div class="welcome-box">
-                        <div class="pulse-icon"><i class="fa-solid fa-robot"></i></div>
-                        <h2>Supply Chain Resilience Agent</h2>
-                        <p class="text-secondary mb-4">A 6-layer autonomous agent architecture orchestrating Perception, Risk Intelligence, Planning, Actions, Memory, and Transparency routines.</p>
-                        <button class="btn btn-primary btn-lg" onclick="startWizard()">Initialize Run <i class="fa-solid fa-play ml-2"></i></button>
-                    </div>
-                </div>
 
-            </div>
+                    <div id="view-step-2" class="step-view">
+                        <div class="stats-grid mb-4">
+                            <div class="stat-card warning">
+                                <p class="eyebrow">Risk level</p>
+                                <p id="s2-level" class="stat">-</p>
+                            </div>
+                            <div class="stat-card">
+                                <p class="eyebrow">Revenue at risk</p>
+                                <p id="s2-rev" class="stat">-</p>
+                            </div>
+                            <div class="stat-card">
+                                <p class="eyebrow">Downtime</p>
+                                <p id="s2-down" class="stat">-</p>
+                            </div>
+                        </div>
+                        <div class="payload-card shell-inset">
+                            <div class="section-head">
+                                <div>
+                                    <p class="eyebrow">Layer output</p>
+                                    <h3>Risk Intelligence Output</h3>
+                                </div>
+                            </div>
+                            <pre id="s2-json" class="code-block">{}</pre>
+                        </div>
+                        <div class="action-bar">
+                            <button class="btn btn-primary" onclick="proceedToStep(3)">Approve & Proceed to Layer 3 <i class="fa-solid fa-arrow-right"></i></button>
+                        </div>
+                    </div>
+
+                    <div id="view-step-3" class="step-view">
+                        <div class="feature-card feature-primary mb-4">
+                            <div class="card-head">
+                                <div>
+                                    <p class="eyebrow">Recommended plan</p>
+                                    <h3>Mohid's Chosen Plan</h3>
+                                </div>
+                                <div class="card-icon"><i class="fa-solid fa-route"></i></div>
+                            </div>
+                            <h2 id="s3-chosen-plan" class="plan-title">-</h2>
+                            <div class="plan-meta">
+                                <div><span>Cost</span><strong id="s3-cost">-</strong></div>
+                                <div><span>Reasoning</span><strong id="s3-reasoning">-</strong></div>
+                            </div>
+                        </div>
+                        <div class="payload-card shell-inset">
+                            <div class="section-head">
+                                <div>
+                                    <p class="eyebrow">Decision support</p>
+                                    <h3>Tamim's Options Comparison</h3>
+                                </div>
+                            </div>
+                            <div class="options-grid" id="s3-options"></div>
+                        </div>
+                        <div class="action-bar">
+                            <button class="btn btn-primary" onclick="proceedToStep(4)">Approve Plan & Proceed to Layer 4 <i class="fa-solid fa-arrow-right"></i></button>
+                        </div>
+                    </div>
+
+                    <div id="view-step-4" class="step-view">
+                        <div class="stats-grid mb-4">
+                            <div class="stat-card">
+                                <p class="eyebrow">Escalation trigger</p>
+                                <p id="s4-escalation" class="stat text-warning">-</p>
+                            </div>
+                            <div class="stat-card">
+                                <p class="eyebrow">PO adjustment</p>
+                                <p id="s4-po" class="metric-text">-</p>
+                            </div>
+                            <div class="stat-card">
+                                <p class="eyebrow">Workflow log</p>
+                                <p id="s4-workflow" class="metric-text">-</p>
+                            </div>
+                        </div>
+
+                        <div class="grid-2">
+                            <div class="payload-card shell-inset">
+                                <div class="section-head">
+                                    <div>
+                                        <p class="eyebrow">Supplier communication</p>
+                                        <h3>Drafted Outreach</h3>
+                                    </div>
+                                </div>
+                                <pre id="s4-email" class="code-block"></pre>
+                            </div>
+
+                            <div class="payload-card shell-inset">
+                                <div class="section-head">
+                                    <div>
+                                        <p class="eyebrow">Executive escalation</p>
+                                        <h3>Ops Brief</h3>
+                                    </div>
+                                </div>
+                                <pre id="s4-alert" class="code-block"></pre>
+                            </div>
+                        </div>
+
+                        <div class="action-bar">
+                            <button class="btn btn-success" onclick="proceedToStep(5)">Approve & Execute Actions <i class="fa-solid fa-check"></i></button>
+                        </div>
+                    </div>
+
+                    <div id="view-step-5" class="step-view">
+                        <div class="feature-card feature-primary mb-4">
+                            <div class="card-head">
+                                <div>
+                                    <p class="eyebrow">Memory compression</p>
+                                    <h3>Reflection Summary</h3>
+                                </div>
+                                <div class="card-icon"><i class="fa-solid fa-brain"></i></div>
+                            </div>
+                            <p id="s5-summary" class="feature-copy">-</p>
+                        </div>
+                        <div class="grid-2">
+                            <div class="payload-card shell-inset">
+                                <div class="section-head">
+                                    <div>
+                                        <p class="eyebrow">Lesson captured</p>
+                                        <h3>Mitigation insight</h3>
+                                    </div>
+                                </div>
+                                <div id="s5-lesson" class="text-box">-</div>
+                            </div>
+                            <div class="payload-card shell-inset">
+                                <div class="section-head">
+                                    <div>
+                                        <p class="eyebrow">Outcome quality</p>
+                                        <h3>Success metric</h3>
+                                    </div>
+                                </div>
+                                <div id="s5-metric" class="text-box">-</div>
+                            </div>
+                        </div>
+                        <div class="action-bar">
+                            <button class="btn btn-primary" onclick="proceedToStep(6)">Proceed to Final Transparency Review <i class="fa-solid fa-arrow-right"></i></button>
+                        </div>
+                    </div>
+
+                    <div id="view-step-6" class="step-view">
+                        <div class="feature-card feature-primary mb-4">
+                            <div class="card-head">
+                                <div>
+                                    <p class="eyebrow">Explainability trace</p>
+                                    <h3>Why the system chose this path</h3>
+                                </div>
+                                <div class="card-icon"><i class="fa-solid fa-shield-heart"></i></div>
+                            </div>
+                            <pre id="s6-trace" class="code-block"></pre>
+                        </div>
+
+                        <div class="grid-3">
+                            <div class="payload-card shell-inset">
+                                <div class="section-head">
+                                    <div>
+                                        <p class="eyebrow">Override threshold</p>
+                                        <h3>Human checkpoint</h3>
+                                    </div>
+                                </div>
+                                <div id="s6-threshold" class="text-box border-warning">-</div>
+                            </div>
+
+                            <div class="payload-card shell-inset">
+                                <div class="section-head">
+                                    <div>
+                                        <p class="eyebrow">Assumptions</p>
+                                        <h3>Model basis</h3>
+                                    </div>
+                                </div>
+                                <ul id="s6-assumptions" class="bullet-list"></ul>
+                            </div>
+
+                            <div class="payload-card shell-inset">
+                                <div class="section-head">
+                                    <div>
+                                        <p class="eyebrow">Validation</p>
+                                        <h3>Bias & constraints</h3>
+                                    </div>
+                                </div>
+                                <div id="s6-validation" class="text-box">-</div>
+                            </div>
+                        </div>
+
+                        <div class="welcome-box text-center mx-auto">
+                            <div class="circle-icon"><i class="fa-solid fa-circle-check"></i></div>
+                            <p class="eyebrow">Cycle complete</p>
+                            <h2>Decision package approved</h2>
+                            <p class="welcome-copy">You now have a modern end-to-end workflow demonstrating signal intake, quantified risk, mitigation selection, action generation, memory logging, and transparent decision review.</p>
+                            <div class="welcome-actions justify-center">
+                                <button class="btn btn-primary btn-lg" onclick="startNewCycle()">Start New Cycle</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="view-welcome" class="step-view active welcome-state">
+                        <div class="welcome-box">
+                            <div class="pulse-icon"><i class="fa-solid fa-robot"></i></div>
+                            <p class="eyebrow">Command center</p>
+                            <h2>Autonomous Supply Chain Resilience Agent</h2>
+                            <p class="welcome-copy">A modern 6-layer workflow for perception, risk intelligence, mitigation planning, response execution, memory logging, and transparent decision review.</p>
+                            <div class="welcome-actions">
+                                <button class="btn btn-primary btn-lg" onclick="startWizard()">Initialize Run <i class="fa-solid fa-play"></i></button>
+                                <button class="btn btn-secondary" onclick="startNewCycle()">Reset Demo</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </main>
     </div>
-    
+
     <script src="/static/script.js"></script>
 </body>
 </html>

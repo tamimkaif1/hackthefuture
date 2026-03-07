@@ -75,13 +75,23 @@ python run_agent.py --iterations 5 --no-input
 2. Set `USE_MOCK_DATA=0` and add your `GOOGLE_API_KEY`.
 3. Run: `python run_agent.py --no-mock`.
 
-## Optional: FastAPI server
+## Run everything (API + frontend)
+
+One server serves both the **web UI** and the **API**:
 
 ```bash
+# Install (if not already)
+pip install -r requirements.txt
+
+# Start the app (frontend at http://localhost:8000)
 uvicorn app_fastapi:app --reload
 ```
 
-Endpoints: `POST /risk-assessment`, `POST /plan`, `POST /actions`, `POST /transparency`. Request bodies use `schemas.tamim_schema` models.
+Then open **http://localhost:8000** in your browser. Use “Start workflow” to run the 6-layer pipeline step-by-step in the UI. The same mock data is used; no API key required.
+
+The same server also exposes:
+- **Wizard API** (used by the UI): `GET /api/step1_perception`, `POST /api/step2_risk`, `POST /api/step3_plan`, etc.
+- **Programmatic API**: `POST /risk-assessment`, `POST /plan`, `POST /actions`, `POST /transparency` (request bodies use `schemas.tamim_schema` models).
 
 ## Data flow (mock)
 

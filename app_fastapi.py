@@ -1,28 +1,201 @@
 """
-Optional FastAPI entry point for Supply Chain Agent API.
-Exposes Tamim's endpoints: /risk-assessment, /plan, /actions, /transparency.
+FastAPI entry point for Supply Chain Agent API and frontend.
+- Serves the web UI at / (static/index.html) and /static/*
+- Exposes Tamim endpoints: /risk-assessment, /plan, /actions, /transparency
+- Exposes wizard endpoints for the frontend: /api/step1_perception ... /api/step6_transparency
 """
 
-from fastapi import FastAPI
+import os
+import json
+
+# Default to mock so the app runs without API keys
+if "USE_MOCK_DATA" not in os.environ:
+    os.environ["USE_MOCK_DATA"] = "1"
+
+from pathlib import Path
+
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+
 from schemas.tamim_schema import (
     RiskAssessmentRequest,
     RiskAssessmentResponse,
     PlanningResponse,
+    PlanOption,
     ActionRequest,
     ActionResponse,
     TransparencyRequest,
     TransparencyResponse,
+    ManufacturerProfile,
+    PerceptionOutput,
 )
 from risk_intelligence.risk_engine import assess_risk
 from risk_intelligence.planning_engine import simulate_plan_options
+from risk_intelligence.adapter import to_perception_output, get_manufacturer_profile
 from action.action_generator import generate_actions
 from transparency.transparency import build_transparency
+from perception.news_parser import NewsParser
+from perception.erp_mock import ERPMockConnector
+from perception.classifier import RiskClassifier
+from perception.supplier_health import compute_supplier_health_scores, format_supplier_health_for_summary
+from perception.models import SupplyRiskAssessment
+from planning.decision_engine import DecisionEngine
+from planning.models import MitigationPlan
+from memory.reflection import ReflectionEngine
 
 app = FastAPI(title="Supply Chain Resilience Agent API")
 
+# Paths for static files (run from project root)
+BASE_DIR = Path(__file__).resolve().parent
+STATIC_DIR = BASE_DIR / "static"
 
+
+def _mitigation_plan_to_planning_response(plan: MitigationPlan) -> PlanningResponse:
+    """Build Tamim PlanningResponse from Mohid MitigationPlan."""
+    opt = PlanOption(
+        name=plan.chosen_scenario.action_type,
+        mitigation_cost=float(plan.chosen_scenario.estimated_cost_usd),
+        resulting_downtime_days=0,
+        revenue_saved=0,
+        penalty_saved=0,
+        net_benefit=0,
+    )
+    return PlanningResponse(options=[opt], recommended_option=plan.chosen_scenario.action_type)
+
+
+def _execute_actions(actions: ActionResponse, risk_assessment: dict):
+    """Log executed actions to pending_actions.json (mock workflow)."""
+    path = BASE_DIR / "pending_actions.json"
+    record = {
+        "executive_alert": actions.executive_alert,
+        "po_adjustment_suggestion": actions.po_adjustment_suggestion,
+        "risk_level": risk_assessment.get("risk_level", ""),
+        "affected_part": risk_assessment.get("affected_part", ""),
+        "escalation_trigger": getattr(actions, "escalation_trigger", "") or "",
+    }
+    history = []
+    if path.exists():
+        with open(path, "r") as f:
+            history = json.load(f)
+    history.append(record)
+    with open(path, "w") as f:
+        json.dump(history, f, indent=2)
+
+
+# ----- Frontend: serve static and index -----
 @app.get("/")
-def root():
+def serve_index():
+    """Serve the single-page frontend."""
+    index_path = STATIC_DIR / "index.html"
+    if not index_path.exists():
+        return {"message": "Supply Chain Resilience Agent API is running.", "frontend": "static/index.html not found"}
+    return FileResponse(index_path)
+
+if STATIC_DIR.exists():
+    app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+
+
+# ----- Wizard API (used by the frontend) -----
+@app.get("/api/step1_perception")
+def api_step1_perception():
+    """Layer 1: Perception + supplier health. Returns assessment, perception_output, manufacturer_profile, and display fields."""
+    news_parser = NewsParser()
+    erp = ERPMockConnector()
+    classifier = RiskClassifier()
+    news_signal = news_parser.fetch_latest_news()
+    location_keyword = (news_signal.location or "").split(",")[0].strip() or ""
+    erp_context = erp.get_parts_by_location(location_keyword) if location_keyword else erp.get_inventory_snapshot()
+    supplier_health = compute_supplier_health_scores(erp_context)
+    supplier_health_summary = format_supplier_health_for_summary(supplier_health)
+    assessment = classifier.assess_risk(news_signal, erp_context)
+    if not assessment:
+        raise HTTPException(status_code=500, detail="Layer 1 failed to produce assessment")
+    perception_output = to_perception_output(assessment, news_signal, erp_context)
+    manufacturer_profile = get_manufacturer_profile(erp_context)
+    return {
+        "assessment": assessment.model_dump(),
+        "perception_output": perception_output.model_dump(),
+        "manufacturer_profile": manufacturer_profile.model_dump(),
+        "news_headline": news_signal.headline,
+        "erp_context_size": len(erp_context),
+        "supplier_health_summary": supplier_health_summary,
+    }
+
+
+@app.post("/api/step2_risk")
+def api_step2_risk(payload: dict):
+    """Layer 2: Risk assessment from perception + manufacturer profile."""
+    result = assess_risk(
+        payload["perception_output"],
+        payload["manufacturer_profile"],
+    )
+    return result.model_dump()
+
+
+@app.post("/api/step3_plan")
+def api_step3_plan(payload: dict):
+    """Layer 3: Mohid plan + Tamim options. Returns mohid_plan, planning_response, tamim_options."""
+    assessment_dict = payload["assessment"]
+    risk_assessment = payload["risk_assessment"]
+    assessment = SupplyRiskAssessment(**assessment_dict)
+    planner = DecisionEngine()
+    mohid_plan = planner.formulate_plan(assessment, layer2_risk_data=risk_assessment)
+    risk_response = RiskAssessmentResponse(**risk_assessment)
+    tamim_response = simulate_plan_options(risk_response)
+    planning_response = _mitigation_plan_to_planning_response(mohid_plan)
+    return {
+        "mohid_plan": mohid_plan.model_dump(),
+        "planning_response": planning_response.model_dump(),
+        "tamim_options": [o.model_dump() for o in tamim_response.options],
+    }
+
+
+@app.post("/api/step4_actions_generate")
+def api_step4_actions_generate(payload: dict):
+    """Layer 4: Generate actions from manufacturer_profile, risk_assessment, planning_response."""
+    req = ActionRequest(
+        manufacturer_profile=ManufacturerProfile(**payload["manufacturer_profile"]),
+        risk_assessment=RiskAssessmentResponse(**payload["risk_assessment"]),
+        planning_response=PlanningResponse(**payload["planning_response"]),
+    )
+    actions = generate_actions(req)
+    return actions.model_dump()
+
+
+@app.post("/api/step4_actions_execute")
+def api_step4_actions_execute(payload: dict):
+    """Layer 4: Execute actions (log to pending_actions.json)."""
+    actions = ActionResponse(**payload["actions"])
+    _execute_actions(actions, payload["risk_assessment"])
+    return {"status": "ok"}
+
+
+@app.post("/api/step5_memory")
+def api_step5_memory(payload: dict):
+    """Layer 5: Memory & reflection (save to past_disruptions + memory_chunks)."""
+    assessment = SupplyRiskAssessment(**payload["assessment"])
+    mohid_plan = MitigationPlan(**payload["mohid_plan"])
+    memory = ReflectionEngine()
+    memory.reflect_and_store(assessment, mohid_plan, auto_save=True)
+    return {"status": "ok"}
+
+
+@app.post("/api/step6_transparency")
+def api_step6_transparency(payload: dict):
+    """Layer 6: Transparency report."""
+    req = TransparencyRequest(
+        perception_output=PerceptionOutput(**payload["perception_output"]),
+        risk_assessment=RiskAssessmentResponse(**payload["risk_assessment"]),
+        planning_response=PlanningResponse(**payload["planning_response"]),
+    )
+    result = build_transparency(req)
+    return result.model_dump()
+
+
+# ----- Raw Tamim API (programmatic) -----
+@app.get("/health")
+def health():
     return {"message": "Supply Chain Resilience Agent API is running."}
 
 
