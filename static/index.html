@@ -180,6 +180,7 @@
 
                         <div class="action-bar">
                             <button class="btn btn-primary" onclick="proceedToStep(2)">Approve & Proceed to Layer 2 <i class="fa-solid fa-arrow-right"></i></button>
+                            <button class="btn btn-outline" onclick="openCustomizeModal(1)"><i class="fa-solid fa-pen"></i> Decline & Customize</button>
                         </div>
                     </div>
 
@@ -209,6 +210,7 @@
                         </div>
                         <div class="action-bar">
                             <button class="btn btn-primary" onclick="proceedToStep(3)">Approve & Proceed to Layer 3 <i class="fa-solid fa-arrow-right"></i></button>
+                            <button class="btn btn-outline" onclick="openCustomizeModal(2)"><i class="fa-solid fa-pen"></i> Decline & Customize</button>
                         </div>
                     </div>
 
@@ -238,6 +240,7 @@
                         </div>
                         <div class="action-bar">
                             <button class="btn btn-primary" onclick="proceedToStep(4)">Approve Plan & Proceed to Layer 4 <i class="fa-solid fa-arrow-right"></i></button>
+                            <button class="btn btn-outline" onclick="openCustomizeModal(3)"><i class="fa-solid fa-pen"></i> Decline & Customize</button>
                         </div>
                     </div>
 
@@ -280,7 +283,8 @@
                         </div>
 
                         <div class="action-bar">
-                            <button class="btn btn-success" onclick="proceedToStep(5)">Approve & Execute Actions <i class="fa-solid fa-check"></i></button>
+                            <button class="btn btn-success" onclick="executeActions()">Approve & Execute Actions <i class="fa-solid fa-check"></i></button>
+                            <button class="btn btn-outline" onclick="openCustomizeModal(4)"><i class="fa-solid fa-pen"></i> Decline & Customize</button>
                         </div>
                     </div>
 
@@ -317,6 +321,7 @@
                         </div>
                         <div class="action-bar">
                             <button class="btn btn-primary" onclick="proceedToStep(6)">Proceed to Final Transparency Review <i class="fa-solid fa-arrow-right"></i></button>
+                            <button class="btn btn-outline" onclick="openCustomizeModal(5)"><i class="fa-solid fa-pen"></i> Decline & Customize</button>
                         </div>
                     </div>
 
@@ -373,6 +378,9 @@
                                 <button class="btn btn-primary btn-lg" onclick="startNewCycle()">Start New Cycle</button>
                             </div>
                         </div>
+                        <div class="action-bar" style="margin-top:1.5rem;">
+                            <button class="btn btn-outline" onclick="openCustomizeModal(6)"><i class="fa-solid fa-pen"></i> Decline & Customize</button>
+                        </div>
                     </div>
 
                     <div id="view-welcome" class="step-view active welcome-state">
@@ -390,6 +398,22 @@
                 </div>
             </section>
         </main>
+    </div>
+
+    <!-- Decline & Customize Modal (reused for all steps) -->
+    <div id="customize-modal" class="modal-overlay hidden">
+        <div class="modal shell-panel">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-pen-to-square"></i> Decline AI suggestion & enter your own</h3>
+                <button type="button" class="modal-close" onclick="closeCustomizeModal()" aria-label="Close">&times;</button>
+            </div>
+            <p class="modal-subtitle">Describe what you want done. The AI will build on your input and revise its recommendation.</p>
+            <textarea id="customize-prompt" rows="4" placeholder="e.g. I want to prioritize cost over speed. Use the cheapest mitigation option."></textarea>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeCustomizeModal()">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="submitCustomize()">Apply & Regenerate <i class="fa-solid fa-wand-magic-sparkles"></i></button>
+            </div>
+        </div>
     </div>
 
     <script src="/static/script.js"></script>

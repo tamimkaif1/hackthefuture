@@ -9,6 +9,15 @@ let appState = {
     actions: null
 };
 
+let customizeStep = 0;
+
+function esc(s) {
+    if (s == null) return '';
+    const div = document.createElement('div');
+    div.textContent = String(s);
+    return div.innerHTML;
+}
+
 const views = ['welcome', 'step-1', 'step-2', 'step-3', 'step-4', 'step-5', 'step-6'];
 
 function showLoader(text) {
@@ -214,15 +223,15 @@ async function fetchStep4() {
 
         document.getElementById('s4-email').innerText = data.supplier_email;
         document.getElementById('s4-alert').innerText = data.executive_alert;
-        
-        if (data.escalation_trigger) {
-            document.getElementById('s4-escalation-card').style.display = 'block';
-            document.getElementById('s4-escalation').innerText = data.escalation_trigger;
-        } else {
-            document.getElementById('s4-escalation-card').style.display = 'none';
-        }
+        document.getElementById('s4-po').innerText = data.po_adjustment_suggestion || '-';
+        document.getElementById('s4-escalation').innerText = data.escalation_trigger || '-';
 
-        document.getElementById('s4-log').innerText = JSON.stringify(data.workflow_integration_log, null, 2);
+        const workflowEl = document.getElementById('s4-workflow');
+        if (workflowEl) {
+            workflowEl.innerText = Array.isArray(data.workflow_integration_log)
+                ? data.workflow_integration_log.join('\n')
+                : JSON.stringify(data.workflow_integration_log || [], null, 2);
+        }
 
         setView('step-4');
     } catch(e) {
@@ -259,11 +268,18 @@ async function fetchStep5() {
             assessment: appState.assessment,
             mohid_plan: appState.mohid_plan
         };
-        await fetch('/api/step5_memory', {
+        const res = await fetch('/api/step5_memory', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Memory step failed');
+
+        document.getElementById('s5-summary').innerText = data.summary_text || '-';
+        document.getElementById('s5-lesson').innerText = data.key_takeaways || '-';
+        document.getElementById('s5-metric').innerText = data.success_metric || '-';
+
         setView('step-5');
     } catch(e) {
         alert(e);
@@ -303,6 +319,107 @@ async function fetchStep6() {
 
         setView('step-6');
     } catch(e) {
+        alert(e);
+    }
+    hideLoader();
+}
+
+function openCustomizeModal(step) {
+    customizeStep = step;
+    document.getElementById('customize-prompt').value = '';
+    document.getElementById('customize-modal').classList.remove('hidden');
+}
+
+function closeCustomizeModal() {
+    document.getElementById('customize-modal').classList.add('hidden');
+    customizeStep = 0;
+}
+
+async function submitCustomize() {
+    const prompt = document.getElementById('customize-prompt').value.trim();
+    if (!prompt) {
+        alert('Please enter your instructions.');
+        return;
+    }
+    showLoader('Applying your instructions and regenerating...');
+    closeCustomizeModal();
+    try {
+        if (customizeStep === 1) {
+            const res = await fetch('/api/step1_customize', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ assessment: appState.assessment, custom_prompt: prompt })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.detail || 'Customize failed');
+            appState.assessment = data.assessment;
+            document.getElementById('s1-json').innerText = JSON.stringify(data.assessment, null, 2);
+        } else if (customizeStep === 2) {
+            const payload = { perception_output: appState.perception_output, manufacturer_profile: appState.manufacturer_profile, custom_prompt: prompt };
+            const res = await fetch('/api/step2_risk', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.detail || 'Customize failed');
+            appState.risk_assessment = data;
+            document.getElementById('s2-level').innerText = data.risk_level.toUpperCase();
+            const levelWrap = document.getElementById('s2-level').parentElement;
+            levelWrap.className = 'info-box';
+            if (data.risk_level.toLowerCase() === 'critical') levelWrap.style.borderLeftColor = 'var(--danger)';
+            else if (data.risk_level.toLowerCase() === 'high') levelWrap.style.borderLeftColor = 'var(--warning)';
+            else levelWrap.style.borderLeftColor = 'var(--success)';
+            document.getElementById('s2-rev').innerText = `$${data.revenue_at_risk.toLocaleString()}`;
+            document.getElementById('s2-down').innerText = data.downtime_days;
+            document.getElementById('s2-json').innerText = JSON.stringify(data, null, 2);
+        } else if (customizeStep === 3) {
+            const payload = { assessment: appState.assessment, risk_assessment: appState.risk_assessment, custom_prompt: prompt };
+            const res = await fetch('/api/step3_plan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.detail || 'Customize failed');
+            appState.mohid_plan = data.mohid_plan;
+            appState.planning_response = data.planning_response;
+            document.getElementById('s3-chosen-plan').innerText = data.mohid_plan.chosen_scenario.action_type;
+            document.getElementById('s3-cost').innerText = `$${data.mohid_plan.chosen_scenario.estimated_cost_usd.toLocaleString()}`;
+            document.getElementById('s3-reasoning').innerText = data.mohid_plan.reasoning_tree;
+            const grid = document.getElementById('s3-options');
+            grid.innerHTML = '';
+            data.tamim_options.forEach(opt => {
+                const isRec = opt.name === data.planning_response.recommended_option;
+                grid.innerHTML += `<div class="info-box ${isRec ? 'border-warning' : ''}" style="margin-bottom:15px; background: rgba(0,0,0,0.3);"><h4 style="color:var(--text-primary)">${esc(opt.name)} ${isRec ? '<span class="badge" style="background:var(--accent);font-size:0.6rem;float:right;">Chosen</span>' : ''}</h4><p class="text-secondary" style="font-size:0.85rem;margin-top:5px;">Cost: <span style="color:#fff">$${opt.mitigation_cost.toLocaleString()}</span></p><p class="text-secondary" style="font-size:0.85rem;">Net Benefit: <span style="color:var(--success)">$${opt.net_benefit.toLocaleString()}</span></p></div>`;
+            });
+        } else if (customizeStep === 4) {
+            const payload = { manufacturer_profile: appState.manufacturer_profile, risk_assessment: appState.risk_assessment, planning_response: appState.planning_response, custom_prompt: prompt };
+            const res = await fetch('/api/step4_actions_generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.detail || 'Customize failed');
+            appState.actions = data;
+            document.getElementById('s4-email').innerText = data.supplier_email;
+            document.getElementById('s4-alert').innerText = data.executive_alert;
+            document.getElementById('s4-po').innerText = data.po_adjustment_suggestion || '-';
+            document.getElementById('s4-escalation').innerText = data.escalation_trigger || '-';
+            const workflowEl = document.getElementById('s4-workflow');
+            if (workflowEl) workflowEl.innerText = Array.isArray(data.workflow_integration_log) ? data.workflow_integration_log.join('\n') : JSON.stringify(data.workflow_integration_log || [], null, 2);
+        } else if (customizeStep === 5) {
+            const payload = { assessment: appState.assessment, mohid_plan: appState.mohid_plan, custom_prompt: prompt };
+            const res = await fetch('/api/step5_memory', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.detail || 'Customize failed');
+            document.getElementById('s5-summary').innerText = data.summary_text || '-';
+            document.getElementById('s5-lesson').innerText = data.key_takeaways || '-';
+            document.getElementById('s5-metric').innerText = data.success_metric || '-';
+        } else if (customizeStep === 6) {
+            const payload = { perception_output: appState.perception_output, risk_assessment: appState.risk_assessment, planning_response: appState.planning_response, custom_prompt: prompt };
+            const res = await fetch('/api/step6_transparency', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.detail || 'Customize failed');
+            document.getElementById('s6-trace').innerText = data.reasoning_trace;
+            document.getElementById('s6-threshold').innerText = data.human_override_threshold;
+            const asmList = document.getElementById('s6-assumptions');
+            asmList.innerHTML = '';
+            data.assumptions.forEach(a => { asmList.innerHTML += `<li>${esc(a)}</li>`; });
+            const valList = document.getElementById('s6-validation');
+            valList.innerHTML = '';
+            data.bias_and_constraint_validation.forEach(v => { valList.innerHTML += `<li>${esc(v)}</li>`; });
+        }
+    } catch (e) {
         alert(e);
     }
     hideLoader();

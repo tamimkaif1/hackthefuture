@@ -56,7 +56,8 @@ class ReflectionEngine:
             """
             )
 
-    def reflect_and_store(self, assessment: SupplyRiskAssessment, plan: MitigationPlan, auto_save: bool = False):
+    def reflect_and_store(self, assessment: SupplyRiskAssessment, plan: MitigationPlan, auto_save: bool = False) -> ReflectionSummary:
+        """Generate reflection, optionally save to disk, and return the reflection summary."""
         print(f"\n[Memory Engine] Generating reflection for event {assessment.signal_id}...")
         if self.use_mock:
             reflection = _mock_reflection(assessment, plan)
@@ -97,6 +98,8 @@ class ReflectionEngine:
                 print("[System] Memory stored locally in past_disruptions.json and memory_chunks.json")
             else:
                 print("[System] Memory discarded.")
+
+        return reflection
 
     def _save_memory_chunk(self, assessment: SupplyRiskAssessment, reflection: ReflectionSummary):
         """Append a short chunk for AI memory (condensed summary for future context)."""

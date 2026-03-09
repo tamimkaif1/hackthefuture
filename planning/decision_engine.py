@@ -15,8 +15,9 @@ except Exception:
 def _mock_plan_from_layer2(
     risk_assessment: SupplyRiskAssessment,
     layer2_risk: Optional[Any],
+    custom_prompt: Optional[str] = None,
 ) -> MitigationPlan:
-    """Deterministic mock plan from Layer 1 + Layer 2 data (no API)."""
+    """Deterministic mock plan from Layer 1 + Layer 2 data (no API). custom_prompt influences choice."""
     part = risk_assessment.affected_parts[0] if risk_assessment.affected_parts else "Unknown"
     # Use Layer 2 numbers if provided
     if layer2_risk is not None:
@@ -25,34 +26,52 @@ def _mock_plan_from_layer2(
     else:
         exposure = 2_500_000
         downtime = 12
-    # Pick action by exposure level (mock logic)
-    if exposure >= 5_000_000:
-        action_type = "Air freight critical components"
-        cost = 350000
-        realloc = "Alternate supplier"
-        buffer = 2000
-    elif exposure >= 1_000_000:
-        action_type = "Switch partial volume to alternate supplier"
-        cost = 150000
-        realloc = "Alternate supplier"
-        buffer = 1000
+
+    # User override: keyword matching on custom_prompt
+    prompt_lower = (custom_prompt or "").lower()
+    action_type = None
+    cost = None
+    realloc = None
+    buffer = None
+    if prompt_lower:
+        if any(w in prompt_lower for w in ["cheapest", "low cost", "buffer", "stock", "minimize cost"]):
+            action_type, cost, realloc, buffer = "Increase emergency buffer stock", 80000, "N/A", 500
+        elif any(w in prompt_lower for w in ["air", "fast", "expedite", "urgent", "speed"]):
+            action_type, cost, realloc, buffer = "Air freight critical components", 350000, "Alternate supplier", 2000
+        elif any(w in prompt_lower for w in ["supplier", "alternate", "switch", "re-source"]):
+            action_type, cost, realloc, buffer = "Switch partial volume to alternate supplier", 150000, "Alternate supplier", 1000
+        elif any(w in prompt_lower for w in ["nothing", "do nothing", "wait"]):
+            action_type, cost, realloc, buffer = "Do nothing", 0, "N/A", 0
+
+    # Fallback: exposure-based default
+    if action_type is None:
+        if exposure >= 5_000_000:
+            action_type, cost, realloc, buffer = "Air freight critical components", 350000, "Alternate supplier", 2000
+        elif exposure >= 1_000_000:
+            action_type, cost, realloc, buffer = "Switch partial volume to alternate supplier", 150000, "Alternate supplier", 1000
+        else:
+            action_type, cost, realloc, buffer = "Increase emergency buffer stock", 80000, "N/A", 500
+
+    if action_type == "Do nothing":
+        svc_impact = f"No mitigation; baseline downtime {downtime} days"
+        res_score = 2
     else:
-        action_type = "Increase emergency buffer stock"
-        cost = 80000
-        realloc = "N/A"
-        buffer = 500
+        svc_impact = f"Downtime reduced (mock); was {downtime} days"
+        res_score = min(10, max(1, 10 - (downtime // 3)))
+
     return MitigationPlan(
         plan_id=str(uuid.uuid4()),
         chosen_scenario=ScenarioSimulation(
             scenario_id="mock-plan",
             action_type=action_type,
             estimated_cost_usd=cost,
-            service_level_impact=f"Downtime reduced (mock); was {downtime} days",
-            resilience_score=min(10, max(1, 10 - (downtime // 3))),
+            service_level_impact=svc_impact,
+            resilience_score=res_score,
         ),
         supplier_reallocation_target=realloc,
         buffer_stock_adjustment=buffer,
-        reasoning_tree=f"Mock: Chose {action_type} based on financial exposure ${exposure:,.0f} and downtime {downtime} days.",
+        reasoning_tree=f"Mock: Chose {action_type} based on financial exposure ${exposure:,.0f} and downtime {downtime} days."
+        + (f" [User directive: {custom_prompt[:100]}...]" if custom_prompt and len(custom_prompt) > 100 else (f" [User directive: {custom_prompt}]" if custom_prompt else "")),
     )
 
 
@@ -104,6 +123,7 @@ class DecisionEngine:
         self,
         risk_assessment: SupplyRiskAssessment,
         layer2_risk_data: Optional[Any] = None,
+        custom_prompt: Optional[str] = None,
     ) -> MitigationPlan:
         """Formulate plan from Layer 1 assessment and optional Layer 2 risk (RiskAssessmentResponse or dict)."""
         if layer2_risk_data is not None:
@@ -129,7 +149,7 @@ class DecisionEngine:
 
         if self.use_mock:
             print(f"\n[Planning Engine] Mock mode: generating plan for {risk_assessment.signal_id}...")
-            return _mock_plan_from_layer2(risk_assessment, layer2_risk_data)
+            return _mock_plan_from_layer2(risk_assessment, layer2_risk_data, custom_prompt)
 
         try:
             chain = self.prompt | self.llm
@@ -143,4 +163,4 @@ class DecisionEngine:
             return MitigationPlan(**data)
         except Exception as e:
             print(f"Planning LLM Error: {e}. Falling back to mock plan.")
-            return _mock_plan_from_layer2(risk_assessment, layer2_risk_data)
+            return _mock_plan_from_layer2(risk_assessment, layer2_risk_data, custom_prompt)

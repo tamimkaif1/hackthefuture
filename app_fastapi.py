@@ -123,6 +123,18 @@ def api_step1_perception():
     }
 
 
+@app.post("/api/step1_customize")
+def api_step1_customize(payload: dict):
+    """Layer 1: Revise assessment based on user's custom prompt."""
+    assessment_dict = payload["assessment"].copy()
+    custom = (payload.get("custom_prompt") or "").strip()
+    if custom:
+        assessment_dict["rationale"] = (
+            f"[User override: {custom}] " + assessment_dict.get("rationale", "")
+        )
+    return {"assessment": assessment_dict}
+
+
 @app.post("/api/step2_risk")
 def api_step2_risk(payload: dict):
     """Layer 2: Risk assessment from perception + manufacturer profile."""
@@ -130,7 +142,11 @@ def api_step2_risk(payload: dict):
         payload["perception_output"],
         payload["manufacturer_profile"],
     )
-    return result.model_dump()
+    out = result.model_dump()
+    custom = (payload.get("custom_prompt") or "").strip()
+    if custom:
+        out["_user_note"] = custom
+    return out
 
 
 @app.post("/api/step3_plan")
@@ -138,9 +154,10 @@ def api_step3_plan(payload: dict):
     """Layer 3: Mohid plan + Tamim options. Returns mohid_plan, planning_response, tamim_options."""
     assessment_dict = payload["assessment"]
     risk_assessment = payload["risk_assessment"]
+    custom_prompt = (payload.get("custom_prompt") or "").strip() or None
     assessment = SupplyRiskAssessment(**assessment_dict)
     planner = DecisionEngine()
-    mohid_plan = planner.formulate_plan(assessment, layer2_risk_data=risk_assessment)
+    mohid_plan = planner.formulate_plan(assessment, layer2_risk_data=risk_assessment, custom_prompt=custom_prompt)
     risk_response = RiskAssessmentResponse(**risk_assessment)
     tamim_response = simulate_plan_options(risk_response)
     planning_response = _mitigation_plan_to_planning_response(mohid_plan)
@@ -160,7 +177,14 @@ def api_step4_actions_generate(payload: dict):
         planning_response=PlanningResponse(**payload["planning_response"]),
     )
     actions = generate_actions(req)
-    return actions.model_dump()
+    out = actions.model_dump()
+    custom = (payload.get("custom_prompt") or "").strip()
+    if custom:
+        prefix = f"[Per user request: {custom}]\n\n"
+        out["supplier_email"] = prefix + out.get("supplier_email", "")
+        out["executive_alert"] = prefix + out.get("executive_alert", "")
+        out["po_adjustment_suggestion"] = prefix + out.get("po_adjustment_suggestion", "")
+    return out
 
 
 @app.post("/api/step4_actions_execute")
@@ -173,12 +197,28 @@ def api_step4_actions_execute(payload: dict):
 
 @app.post("/api/step5_memory")
 def api_step5_memory(payload: dict):
-    """Layer 5: Memory & reflection (save to past_disruptions + memory_chunks)."""
+    """Layer 5: Memory & reflection (save to past_disruptions + memory_chunks). Returns reflection for UI."""
     assessment = SupplyRiskAssessment(**payload["assessment"])
     mohid_plan = MitigationPlan(**payload["mohid_plan"])
+    custom = (payload.get("custom_prompt") or "").strip()
     memory = ReflectionEngine()
-    memory.reflect_and_store(assessment, mohid_plan, auto_save=True)
-    return {"status": "ok"}
+    reflection = memory.reflect_and_store(assessment, mohid_plan, auto_save=True)
+    resilience_score = mohid_plan.chosen_scenario.resilience_score
+    success_metric = (
+        f"Mitigation executed successfully. Resilience score: {resilience_score}/10. "
+        f"Action: {mohid_plan.chosen_scenario.action_type} (${mohid_plan.chosen_scenario.estimated_cost_usd:,} cost)."
+    )
+    summary = reflection.summary_text
+    takeaways = reflection.key_takeaways
+    if custom:
+        summary = f"[User directive: {custom}]\n\n{summary}"
+        takeaways = f"[User directive: {custom}]\n\n{takeaways}"
+    return {
+        "status": "ok",
+        "summary_text": summary,
+        "key_takeaways": takeaways,
+        "success_metric": success_metric,
+    }
 
 
 @app.post("/api/step6_transparency")
@@ -190,7 +230,12 @@ def api_step6_transparency(payload: dict):
         planning_response=PlanningResponse(**payload["planning_response"]),
     )
     result = build_transparency(req)
-    return result.model_dump()
+    out = result.model_dump()
+    custom = (payload.get("custom_prompt") or "").strip()
+    if custom:
+        out["reasoning_trace"] = f"[User override: {custom}]\n\n{out.get('reasoning_trace', '')}"
+        out["assumptions"] = [f"User directive incorporated: {custom}"] + out.get("assumptions", [])
+    return out
 
 
 # ----- Raw Tamim API (programmatic) -----

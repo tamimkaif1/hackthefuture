@@ -767,6 +767,113 @@ pre {
 .text-success { color: var(--success); }
 .text-secondary { color: var(--text-secondary); }
 
+.btn-outline {
+  color: var(--accent-2);
+  background: transparent;
+  border: 1px solid rgba(124, 140, 255, 0.35);
+}
+
+.btn-outline:hover {
+  background: rgba(124, 140, 255, 0.1);
+  border-color: rgba(124, 140, 255, 0.5);
+}
+
+/* Decline & Customize Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(7, 11, 31, 0.85);
+  backdrop-filter: blur(8px);
+}
+
+.modal-overlay.hidden {
+  display: none !important;
+}
+
+.modal {
+  width: 100%;
+  max-width: 520px;
+  border-radius: var(--radius-xl);
+  padding: 28px 32px;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.5);
+}
+
+.modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.modal-header h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1.6rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 4px;
+  transition: color 0.2s;
+}
+
+.modal-close:hover {
+  color: var(--text-primary);
+}
+
+.modal-subtitle {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: 18px;
+}
+
+.modal textarea {
+  width: 100%;
+  padding: 16px 18px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  resize: vertical;
+  min-height: 100px;
+  margin-bottom: 20px;
+}
+
+.modal textarea::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.8;
+}
+
+.modal textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(124, 140, 255, 0.15);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
 @media (max-width: 1280px) {
   .hero-grid,
   .dashboard-grid,
