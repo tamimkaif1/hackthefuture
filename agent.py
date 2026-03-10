@@ -6,7 +6,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 load_dotenv()
 
 # 2. Initialize the Gemini AI "brain"
-llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash")
+llm = ChatGoogleGenerativeAI(model="models/gemini-2.5-fast")
 
 # 3. Ask it a test question
 print("Sending test message to Gemini...")

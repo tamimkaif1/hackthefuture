@@ -86,7 +86,7 @@ class DecisionEngine:
         self.llm = None
         self.prompt = None
         if not self.use_mock and _LANGCHAIN_AVAILABLE:
-            self.llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0.3)
+            self.llm = ChatGoogleGenerativeAI(model="gemini-2.5-fast", temperature=0.3)
             self.prompt = PromptTemplate(
                 input_variables=["risk_assessment", "layer2_mock_data"],
                 template="""

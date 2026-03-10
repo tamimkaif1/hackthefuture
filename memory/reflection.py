@@ -33,7 +33,7 @@ class ReflectionEngine:
         self.llm = None
         self.prompt = None
         if not self.use_mock and _LANGCHAIN_AVAILABLE:
-            self.llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0.1)
+            self.llm = ChatGoogleGenerativeAI(model="gemini-2.5-fast", temperature=0.1)
             self.prompt = PromptTemplate(
             input_variables=["event", "plan"],
             template="""

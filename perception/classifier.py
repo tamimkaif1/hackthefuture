@@ -36,7 +36,7 @@ class RiskClassifier:
         self.use_mock = use_mock if use_mock is not None else __import__("config", fromlist=["USE_MOCK_DATA"]).USE_MOCK_DATA
         self.llm = None
         if not self.use_mock and _LANGCHAIN_AVAILABLE:
-            self.llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0.2)
+            self.llm = ChatGoogleGenerativeAI(model="gemini-2.5-fast", temperature=0.2)
         
         # We use a system prompt that enforces structured reasoning
         self.prompt = None
