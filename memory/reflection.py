@@ -6,10 +6,11 @@ from memory.models import DisruptionLog, ReflectionSummary
 
 try:
     from langchain_core.prompts import PromptTemplate
-    from langchain_google_genai import ChatGoogleGenerativeAI
     _LANGCHAIN_AVAILABLE = True
 except Exception:
     _LANGCHAIN_AVAILABLE = False
+
+from gemini_service import get_gemini_chat
 
 
 def _mock_reflection(assessment: SupplyRiskAssessment, plan: MitigationPlan) -> ReflectionSummary:
@@ -33,7 +34,7 @@ class ReflectionEngine:
         self.llm = None
         self.prompt = None
         if not self.use_mock and _LANGCHAIN_AVAILABLE:
-            self.llm = ChatGoogleGenerativeAI(model="gemini-2.5-fast", temperature=0.1)
+            self.llm = get_gemini_chat(temperature=0.1)
             self.prompt = PromptTemplate(
             input_variables=["event", "plan"],
             template="""

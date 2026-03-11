@@ -5,14 +5,10 @@ FastAPI entry point for Supply Chain Agent API and frontend.
 - Exposes wizard endpoints for the frontend: /api/step1_perception ... /api/step6_transparency
 """
 
-import os
 import json
-
-# Default to mock so the app runs without API keys
-if "USE_MOCK_DATA" not in os.environ:
-    os.environ["USE_MOCK_DATA"] = "1"
-
 from pathlib import Path
+
+import logging
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
@@ -43,6 +39,7 @@ from perception.models import SupplyRiskAssessment
 from planning.decision_engine import DecisionEngine
 from planning.models import MitigationPlan
 from memory.reflection import ReflectionEngine
+from gemini_service import get_gemini_chat, is_live_mode
 
 app = FastAPI(title="Supply Chain Resilience Agent API")
 
@@ -241,7 +238,38 @@ def api_step6_transparency(payload: dict):
 # ----- Raw Tamim API (programmatic) -----
 @app.get("/health")
 def health():
-    return {"message": "Supply Chain Resilience Agent API is running."}
+    return {
+        "message": "Supply Chain Resilience Agent API is running.",
+        "gemini_live_mode": is_live_mode(),
+    }
+
+
+@app.get("/debug/gemini")
+def debug_gemini():
+    """
+    Simple debug endpoint to verify that Gemini is reachable.
+
+    Returns a short AI-generated message plus the model name.
+    """
+    try:
+        logging.info("[Debug] Calling Gemini from /debug/gemini endpoint...")
+        llm = get_gemini_chat()
+        response = llm.invoke(
+            "You are part of a supply chain risk demo. "
+            "Respond with a single short sentence confirming that Gemini is live."
+        )
+        return {
+            "status": "ok",
+            "model": getattr(llm, "model", "unknown"),
+            "message": response.content,
+        }
+    except Exception as e:
+        logging.exception("Gemini debug call failed")
+        return {
+            "status": "error",
+            "error": str(e),
+            "message": "AI analysis is unavailable. Check GOOGLE_API_KEY and network connectivity.",
+        }
 
 
 @app.post("/risk-assessment", response_model=RiskAssessmentResponse)

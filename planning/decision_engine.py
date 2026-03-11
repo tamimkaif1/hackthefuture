@@ -6,10 +6,11 @@ from planning.models import MitigationPlan, ScenarioSimulation
 
 try:
     from langchain_core.prompts import PromptTemplate
-    from langchain_google_genai import ChatGoogleGenerativeAI
     _LANGCHAIN_AVAILABLE = True
 except Exception:
     _LANGCHAIN_AVAILABLE = False
+
+from gemini_service import get_gemini_chat
 
 
 def _mock_plan_from_layer2(
@@ -86,7 +87,7 @@ class DecisionEngine:
         self.llm = None
         self.prompt = None
         if not self.use_mock and _LANGCHAIN_AVAILABLE:
-            self.llm = ChatGoogleGenerativeAI(model="gemini-2.5-fast", temperature=0.3)
+            self.llm = get_gemini_chat(temperature=0.3)
             self.prompt = PromptTemplate(
                 input_variables=["risk_assessment", "layer2_mock_data"],
                 template="""

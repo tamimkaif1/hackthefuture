@@ -8,10 +8,11 @@ load_dotenv()
 
 try:
     from langchain_core.prompts import PromptTemplate
-    from langchain_google_genai import ChatGoogleGenerativeAI
     _LANGCHAIN_AVAILABLE = True
 except Exception:
     _LANGCHAIN_AVAILABLE = False
+
+from gemini_service import get_gemini_chat
 
 
 def _mock_assessment(news: NewsSignal, inventory_context: List[ERPInventorySnapshot]) -> SupplyRiskAssessment:
@@ -36,7 +37,7 @@ class RiskClassifier:
         self.use_mock = use_mock if use_mock is not None else __import__("config", fromlist=["USE_MOCK_DATA"]).USE_MOCK_DATA
         self.llm = None
         if not self.use_mock and _LANGCHAIN_AVAILABLE:
-            self.llm = ChatGoogleGenerativeAI(model="gemini-2.5-fast", temperature=0.2)
+            self.llm = get_gemini_chat(temperature=0.2)
         
         # We use a system prompt that enforces structured reasoning
         self.prompt = None
