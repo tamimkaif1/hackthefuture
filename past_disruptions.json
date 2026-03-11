@@ -1,37 +1,37 @@
 [
   {
-    "event_id": "611b624d-4f26-43b2-82e3-0f802f39b285",
+    "event_id": "6fdaeac1-ddd9-4324-a26e-fd449d99b57d",
     "original_risk": {
-      "signal_id": "611b624d-4f26-43b2-82e3-0f802f39b285",
-      "news_summary": "Mock summary: Disruption at Shenzhen, China impacting Major typhoon hitting Port of Shenzhen.",
-      "risk_score": 8,
-      "probability": "High",
-      "impact_level": "High",
+      "signal_id": "6fdaeac1-ddd9-4324-a26e-fd449d99b57d",
+      "news_summary": "Mock summary: Disruption at Red Sea impacting Red Sea Shipping Disruption Continues.",
+      "risk_score": 6,
+      "probability": "Medium",
+      "impact_level": "Medium",
       "affected_parts": [
-        "MECH-VALVE-202"
+        "IC-7NM-001"
       ],
-      "recommended_mitigation": "Expedite alternate shipping or tap secondary suppliers.",
+      "recommended_mitigation": "Monitor rerouting options; reassess lead times.",
       "rationale": "Mock: Event impacts primary supplier location; buffer and lead times indicate high exposure."
     },
     "chosen_mitigation": {
-      "plan_id": "29876c12-f133-4dde-ae38-a5c56e5650ef",
+      "plan_id": "a5af10b6-3e47-445c-8d0f-815b3c023464",
       "chosen_scenario": {
         "scenario_id": "mock-plan",
-        "action_type": "Air freight critical components",
-        "estimated_cost_usd": 350000,
-        "service_level_impact": "Downtime reduced (mock); was 10 days",
-        "resilience_score": 7
+        "action_type": "Increase emergency buffer stock",
+        "estimated_cost_usd": 80000,
+        "service_level_impact": "Downtime reduced (mock); was 0 days",
+        "resilience_score": 10
       },
-      "supplier_reallocation_target": "Alternate supplier",
-      "buffer_stock_adjustment": 2000,
-      "reasoning_tree": "Mock: Chose Air freight critical components based on financial exposure $6,000,000 and downtime 10 days."
+      "supplier_reallocation_target": "N/A",
+      "buffer_stock_adjustment": 500,
+      "reasoning_tree": "Mock: Chose Increase emergency buffer stock based on financial exposure $0 and downtime 0 days."
     },
-    "post_mortem_summary": "Mock: Event 'Mock summary: Disruption at Shenzhen, China impacting Major typhoon hitting Port...' was mitigated via Air freight critical components (cost $350,000). | Mock: Maintain buffer stock for critical parts; consider alternate suppliers for high-exposure regions."
+    "post_mortem_summary": "Mock: Event 'Mock summary: Disruption at Red Sea impacting Red Sea Shipping Disruption Contin...' was mitigated via Increase emergency buffer stock (cost $80,000). | Mock: Maintain buffer stock for critical parts; consider alternate suppliers for high-exposure regions."
   },
   {
-    "event_id": "13b49550-260e-4976-b625-0d4e24f1af1a",
+    "event_id": "7ebb1ad6-8bd8-42e3-b356-2a5821d7572b",
     "original_risk": {
-      "signal_id": "13b49550-260e-4976-b625-0d4e24f1af1a",
+      "signal_id": "7ebb1ad6-8bd8-42e3-b356-2a5821d7572b",
       "news_summary": "Mock summary: Disruption at Hsinchu, Taiwan impacting Semiconductor Fab Fire in Taiwan.",
       "risk_score": 8,
       "probability": "High",
@@ -43,7 +43,7 @@
       "rationale": "Mock: Event impacts primary supplier location; buffer and lead times indicate high exposure."
     },
     "chosen_mitigation": {
-      "plan_id": "cb5917f6-51b6-4cdd-9568-a3645bddec6d",
+      "plan_id": "aee0d7fb-d91b-4b0b-9f57-387a81c041f6",
       "chosen_scenario": {
         "scenario_id": "mock-plan",
         "action_type": "Air freight critical components",
@@ -58,9 +58,9 @@
     "post_mortem_summary": "Mock: Event 'Mock summary: Disruption at Hsinchu, Taiwan impacting Semiconductor Fab Fire in ...' was mitigated via Air freight critical components (cost $350,000). | Mock: Maintain buffer stock for critical parts; consider alternate suppliers for high-exposure regions."
   },
   {
-    "event_id": "982fffb8-ec03-49fa-8a4c-0f3659374bc9",
+    "event_id": "ed23ef93-0056-400c-98fe-77b15c1258e4",
     "original_risk": {
-      "signal_id": "982fffb8-ec03-49fa-8a4c-0f3659374bc9",
+      "signal_id": "ed23ef93-0056-400c-98fe-77b15c1258e4",
       "news_summary": "Mock summary: Disruption at Shenzhen, China impacting Major typhoon hitting Port of Shenzhen.",
       "risk_score": 9,
       "probability": "High",
@@ -72,36 +72,7 @@
       "rationale": "Mock: Event impacts primary supplier location; buffer and lead times indicate high exposure."
     },
     "chosen_mitigation": {
-      "plan_id": "ab8c7891-be79-4db0-8903-55edf533f791",
-      "chosen_scenario": {
-        "scenario_id": "mock-plan",
-        "action_type": "Air freight critical components",
-        "estimated_cost_usd": 350000,
-        "service_level_impact": "Downtime reduced (mock); was 10 days",
-        "resilience_score": 7
-      },
-      "supplier_reallocation_target": "Alternate supplier",
-      "buffer_stock_adjustment": 2000,
-      "reasoning_tree": "Mock: Chose Air freight critical components based on financial exposure $6,000,000 and downtime 10 days."
-    },
-    "post_mortem_summary": "Mock: Event 'Mock summary: Disruption at Shenzhen, China impacting Major typhoon hitting Port...' was mitigated via Air freight critical components (cost $350,000). | Mock: Maintain buffer stock for critical parts; consider alternate suppliers for high-exposure regions."
-  },
-  {
-    "event_id": "b2ba91c8-c413-4864-976e-91006b76bec2",
-    "original_risk": {
-      "signal_id": "b2ba91c8-c413-4864-976e-91006b76bec2",
-      "news_summary": "Mock summary: Disruption at Shenzhen, China impacting Major typhoon hitting Port of Shenzhen.",
-      "risk_score": 9,
-      "probability": "High",
-      "impact_level": "High",
-      "affected_parts": [
-        "MECH-VALVE-202"
-      ],
-      "recommended_mitigation": "Immediately activate backup suppliers; expedite air freight for critical parts.",
-      "rationale": "Mock: Event impacts primary supplier location; buffer and lead times indicate high exposure."
-    },
-    "chosen_mitigation": {
-      "plan_id": "da420be6-fe41-4de0-b2bb-3b4da979f4b3",
+      "plan_id": "2bc8be7d-84a8-407e-80fa-f2f43062fdf2",
       "chosen_scenario": {
         "scenario_id": "mock-plan",
         "action_type": "Air freight critical components",

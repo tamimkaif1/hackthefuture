@@ -73,8 +73,14 @@ def _execute_actions(actions: ActionResponse, risk_assessment: dict):
     }
     history = []
     if path.exists():
-        with open(path, "r") as f:
-            history = json.load(f)
+        try:
+            with open(path, "r") as f:
+                content = f.read().strip()
+                if content:
+                    history = json.loads(content)
+        except json.JSONDecodeError:
+            # If the file is empty or corrupted, reset the history.
+            history = []
     history.append(record)
     with open(path, "w") as f:
         json.dump(history, f, indent=2)
