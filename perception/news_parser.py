@@ -48,3 +48,19 @@ class NewsParser:
             location=news_item.get("location"),
             affected_entities=news_item.get("affected_entities", [])
         )
+
+    def fetch_all_news(self) -> list:
+        """Returns all mock news signals at once (for bubble visualization)."""
+        signals = []
+        for item in self.mock_news_stream:
+            signals.append(NewsSignal(
+                id=str(uuid.uuid4()),
+                headline=item["headline"],
+                content=item["content"],
+                source=item["source"],
+                timestamp=datetime.utcnow().isoformat() + "Z",
+                location=item.get("location"),
+                affected_entities=item.get("affected_entities", [])
+            ))
+        return signals
+

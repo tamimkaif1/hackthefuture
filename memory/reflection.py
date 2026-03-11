@@ -122,10 +122,14 @@ class ReflectionEngine:
     def _save_to_disk(self, log: DisruptionLog):
         history = []
         if os.path.exists(self.log_file):
-            with open(self.log_file, "r") as f:
-                 history = json.load(f)
-                 
+            try:
+                with open(self.log_file, "r") as f:
+                    history = json.load(f)
+            except (json.JSONDecodeError, IOError):
+                history = []
+
         history.append(json.loads(log.model_dump_json()))
-        
+
         with open(self.log_file, "w") as f:
              json.dump(history, f, indent=2)
+

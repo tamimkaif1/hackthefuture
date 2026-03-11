@@ -23,6 +23,9 @@
                     <p class="eyebrow">Operations AI</p>
                     <h2 class="brand-title">SupplyAgent</h2>
                 </div>
+                <button class="settings-btn" onclick="openSettings()" title="Company Settings">
+                    <i class="fa-solid fa-gear"></i>
+                </button>
             </div>
 
             <div class="sidebar-meta">
@@ -34,6 +37,10 @@
                     <span class="meta-label">Scenario</span>
                     <strong>Live disruption cycle</strong>
                 </div>
+                <div class="meta-card" style="display:flex; align-items:center; justify-content:space-between;">
+                    <span class="meta-label" style="margin-bottom:0;">AI Engine</span>
+                    <span id="ai-mode-badge" class="ai-mode-badge mock"><span class="dot"></span> Checking…</span>
+                </div>
             </div>
 
             <ul class="steps-nav" id="steps-nav">
@@ -44,6 +51,13 @@
                         <span class="step-desc">Signal ingestion</span>
                     </div>
                     <span class="step-state">Live</span>
+                    <div class="step-toggle-row">
+                        <span class="step-toggle-label">Human approval</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toggle-step-1" checked onchange="onToggleChange(1, this.checked)">
+                            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                        </label>
+                    </div>
                 </li>
                 <li class="step" data-step="2">
                     <div class="step-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
@@ -52,6 +66,13 @@
                         <span class="step-desc">Assess exposure</span>
                     </div>
                     <span class="step-state">Queued</span>
+                    <div class="step-toggle-row">
+                        <span class="step-toggle-label">Human approval</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toggle-step-2" checked onchange="onToggleChange(2, this.checked)">
+                            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                        </label>
+                    </div>
                 </li>
                 <li class="step" data-step="3">
                     <div class="step-icon"><i class="fa-solid fa-chess-knight"></i></div>
@@ -60,6 +81,13 @@
                         <span class="step-desc">Mitigation options</span>
                     </div>
                     <span class="step-state">Queued</span>
+                    <div class="step-toggle-row">
+                        <span class="step-toggle-label">Human approval</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toggle-step-3" checked onchange="onToggleChange(3, this.checked)">
+                            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                        </label>
+                    </div>
                 </li>
                 <li class="step" data-step="4">
                     <div class="step-icon"><i class="fa-solid fa-bolt"></i></div>
@@ -68,14 +96,28 @@
                         <span class="step-desc">Execute responses</span>
                     </div>
                     <span class="step-state">Queued</span>
+                    <div class="step-toggle-row">
+                        <span class="step-toggle-label">Human approval</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toggle-step-4" checked onchange="onToggleChange(4, this.checked)">
+                            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                        </label>
+                    </div>
                 </li>
                 <li class="step" data-step="5">
                     <div class="step-icon"><i class="fa-solid fa-brain"></i></div>
                     <div class="step-copy">
                         <span class="step-title">Memory</span>
-                        <span class="step-desc">Reflect & learn</span>
+                        <span class="step-desc">Reflect &amp; learn</span>
                     </div>
                     <span class="step-state">Queued</span>
+                    <div class="step-toggle-row">
+                        <span class="step-toggle-label">Human approval</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toggle-step-5" checked onchange="onToggleChange(5, this.checked)">
+                            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                        </label>
+                    </div>
                 </li>
                 <li class="step" data-step="6">
                     <div class="step-icon"><i class="fa-solid fa-shield-halved"></i></div>
@@ -84,6 +126,13 @@
                         <span class="step-desc">Decision logic</span>
                     </div>
                     <span class="step-state">Queued</span>
+                    <div class="step-toggle-row">
+                        <span class="step-toggle-label">Human approval</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toggle-step-6" checked onchange="onToggleChange(6, this.checked)">
+                            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                        </label>
+                    </div>
                 </li>
             </ul>
         </aside>
@@ -142,49 +191,69 @@
                     <p id="loader-text">Analyzing signals...</p>
                 </div>
 
-                <div class="content-body" id="content-body">
-                    <div id="view-step-1" class="step-view">
-                        <div class="dashboard-grid">
-                            <div class="feature-card feature-primary">
-                                <div class="card-head">
-                                    <div>
-                                        <p class="eyebrow">Latest signal</p>
-                                        <h3>Disruption intake</h3>
-                                    </div>
-                                    <div class="card-icon"><i class="fa-solid fa-tower-broadcast"></i></div>
-                                </div>
-                                <p id="s1-news" class="feature-copy">-</p>
-                            </div>
+                <div class="content-body" id="content-body">                    <div id="view-step-1" class="step-view">
+                        <div id="auto-notice-1" class="auto-proceed-notice hidden"><i class="fa-solid fa-bolt"></i> Human approval is off — this step will auto-proceed.</div>
 
-                            <div class="feature-card compact-card">
-                                <p class="eyebrow">ERP context</p>
-                                <p id="s1-erp" class="metric-text">-</p>
+                        <!-- Bubble header -->
+                        <div class="section-head mb-4" style="margin-bottom:18px;">
+                            <div>
+                                <p class="eyebrow">Live disruption feed</p>
+                                <h3>Detected Risk Signals — Select one to analyse</h3>
                             </div>
-
-                            <div class="feature-card compact-card">
-                                <p class="eyebrow">Supplier health</p>
-                                <p id="s1-health" class="metric-text">-</p>
-                            </div>
+                            <div class="pill"><i class="fa-solid fa-circle-dot" style="color:var(--danger);animation:pulse 1.6s infinite;"></i> <span id="s1-risk-count">0</span> signals</div>
                         </div>
 
-                        <div class="payload-card shell-inset">
-                            <div class="section-head">
-                                <div>
-                                    <p class="eyebrow">Layer output</p>
-                                    <h3>Risk Assessment Payload</h3>
+                        <!-- Bubble arena -->
+                        <div id="bubble-arena" class="bubble-arena"></div>
+
+                        <!-- Selected risk detail panel (hidden until a bubble is clicked) -->
+                        <div id="s1-detail" class="risk-detail-panel hidden">
+                            <div class="risk-detail-header">
+                                <div class="risk-detail-score-wrap">
+                                    <div id="s1-detail-score-ring" class="score-ring">
+                                        <span id="s1-detail-score">—</span>
+                                        <small>/10</small>
+                                    </div>
                                 </div>
-                                <div class="pill pill-outline">Structured JSON</div>
+                                <div style="flex:1; min-width:0;">
+                                    <p class="eyebrow">Selected risk</p>
+                                    <h3 id="s1-detail-headline" class="detail-headline">—</h3>
+                                    <p id="s1-detail-location" class="detail-meta"><i class="fa-solid fa-location-dot"></i> —</p>
+                                </div>
+                                <div class="detail-badges">
+                                    <span id="s1-detail-prob" class="detail-badge">—</span>
+                                    <span id="s1-detail-impact" class="detail-badge">—</span>
+                                </div>
                             </div>
-                            <pre id="s1-json" class="code-block">{}</pre>
+                            <div class="detail-grid">
+                                <div>
+                                    <p class="eyebrow">Summary</p>
+                                    <p id="s1-detail-summary" class="detail-text">—</p>
+                                </div>
+                                <div>
+                                    <p class="eyebrow">Recommended mitigation</p>
+                                    <p id="s1-detail-mitigation" class="detail-text">—</p>
+                                </div>
+                                <div>
+                                    <p class="eyebrow">ERP exposure</p>
+                                    <p id="s1-detail-erp" class="detail-text">—</p>
+                                </div>
+                                <div>
+                                    <p class="eyebrow">Supplier health</p>
+                                    <p id="s1-detail-health" class="detail-text">—</p>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="action-bar">
-                            <button class="btn btn-primary" onclick="proceedToStep(2)">Approve & Proceed to Layer 2 <i class="fa-solid fa-arrow-right"></i></button>
-                            <button class="btn btn-outline" onclick="openCustomizeModal(1)"><i class="fa-solid fa-pen"></i> Decline & Customize</button>
+                            <button class="btn btn-primary" id="s1-approve-btn" onclick="proceedToStep(2)" disabled>
+                                Select a risk above, then Approve &amp; Proceed <i class="fa-solid fa-arrow-right"></i>
+                            </button>
+                            <button class="btn btn-outline" onclick="openCustomizeModal(1)"><i class="fa-solid fa-pen"></i> Decline &amp; Customize</button>
                         </div>
                     </div>
-
                     <div id="view-step-2" class="step-view">
+                        <div id="auto-notice-2" class="auto-proceed-notice hidden"><i class="fa-solid fa-bolt"></i> Human approval is off — this step will auto-proceed.</div>
                         <div class="stats-grid mb-4">
                             <div class="stat-card warning">
                                 <p class="eyebrow">Risk level</p>
@@ -206,45 +275,84 @@
                                     <h3>Risk Intelligence Output</h3>
                                 </div>
                             </div>
-                            <pre id="s2-json" class="code-block">{}</pre>
-                        </div>
+                            <!-- Risk detail cards matching real API response -->
+                        <div class="data-cards-grid" id="s2-detail-cards">
+                            <div class="data-card">
+                                <div class="data-card-icon"><i class="fa-solid fa-gauge-high"></i></div>
+                                <div>
+                                    <p class="eyebrow">Disruption probability</p>
+                                    <p id="s2-probability" class="data-card-value">—</p>
+                                </div>
+                            </div>
+                            <div class="data-card">
+                                <div class="data-card-icon"><i class="fa-solid fa-tag"></i></div>
+                                <div>
+                                    <p class="eyebrow">Event type</p>
+                                    <p id="s2-event-type" class="data-card-value">—</p>
+                                </div>
+                            </div>
+                            <div class="data-card">
+                                <div class="data-card-icon"><i class="fa-solid fa-box-open"></i></div>
+                                <div>
+                                    <p class="eyebrow">Affected part</p>
+                                    <p id="s2-parts" class="data-card-value">—</p>
+                                </div>
+                            </div>
+                            <div class="data-card">
+                                <div class="data-card-icon"><i class="fa-solid fa-clock"></i></div>
+                                <div>
+                                    <p class="eyebrow">Delay estimate</p>
+                                    <p id="s2-delay" class="data-card-value">—</p>
+                                </div>
+                            </div>
+                            <div class="data-card">
+                                <div class="data-card-icon"><i class="fa-solid fa-file-contract"></i></div>
+                                <div>
+                                    <p class="eyebrow">SLA penalty risk</p>
+                                    <p id="s2-sla" class="data-card-value">—</p>
+                                </div>
+                            </div>
+                            <div class="data-card">
+                                <div class="data-card-icon" style="background:rgba(255,80,100,0.12); color:var(--danger);"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                                <div>
+                                    <p class="eyebrow">Total exposure</p>
+                                    <p id="s2-total" class="data-card-value" style="color:var(--danger);">—</p>
+                                </div>
+                            </div>
+                             </div>
+                         </div>
                         <div class="action-bar">
-                            <button class="btn btn-primary" onclick="proceedToStep(3)">Approve & Proceed to Layer 3 <i class="fa-solid fa-arrow-right"></i></button>
-                            <button class="btn btn-outline" onclick="openCustomizeModal(2)"><i class="fa-solid fa-pen"></i> Decline & Customize</button>
+                            <button class="btn btn-primary" onclick="proceedToStep(3)">Approve &amp; Proceed to Layer 3 <i class="fa-solid fa-arrow-right"></i></button>
+                            <button class="btn btn-outline" onclick="openCustomizeModal(2)"><i class="fa-solid fa-pen"></i> Decline &amp; Customize</button>
                         </div>
                     </div>
 
                     <div id="view-step-3" class="step-view">
-                        <div class="feature-card feature-primary mb-4">
-                            <div class="card-head">
-                                <div>
-                                    <p class="eyebrow">Recommended plan</p>
-                                    <h3>Mohid's Chosen Plan</h3>
-                                </div>
-                                <div class="card-icon"><i class="fa-solid fa-route"></i></div>
+                        <div id="auto-notice-3" class="auto-proceed-notice hidden"><i class="fa-solid fa-bolt"></i> Human approval is off — this step will auto-proceed.</div>
+
+                        <div class="section-head mb-4" style="margin-bottom:16px;">
+                            <div>
+                                <p class="eyebrow">Decision support</p>
+                                <h3>Select a Mitigation Plan</h3>
                             </div>
-                            <h2 id="s3-chosen-plan" class="plan-title">-</h2>
-                            <div class="plan-meta">
-                                <div><span>Cost</span><strong id="s3-cost">-</strong></div>
-                                <div><span>Reasoning</span><strong id="s3-reasoning">-</strong></div>
-                            </div>
+                            <div id="s3-ai-badge" class="pill"><i class="fa-solid fa-robot" style="color:var(--accent);"></i> AI recommended one below</div>
                         </div>
-                        <div class="payload-card shell-inset">
-                            <div class="section-head">
-                                <div>
-                                    <p class="eyebrow">Decision support</p>
-                                    <h3>Tamim's Options Comparison</h3>
-                                </div>
-                            </div>
-                            <div class="options-grid" id="s3-options"></div>
-                        </div>
-                        <div class="action-bar">
-                            <button class="btn btn-primary" onclick="proceedToStep(4)">Approve Plan & Proceed to Layer 4 <i class="fa-solid fa-arrow-right"></i></button>
-                            <button class="btn btn-outline" onclick="openCustomizeModal(3)"><i class="fa-solid fa-pen"></i> Decline & Customize</button>
+
+                        <!-- Accordion plan list -->
+                        <div id="s3-accordion" class="plan-accordion"></div>
+
+                        <div class="action-bar" style="margin-top:20px;">
+                            <button class="btn btn-primary" id="s3-approve-btn" onclick="proceedToStep(4)" disabled>
+                                Select a plan above, then Approve <i class="fa-solid fa-arrow-right"></i>
+                            </button>
+                            <button class="btn btn-outline" onclick="openCustomizeModal(3)">
+                                <i class="fa-solid fa-pen"></i> Decline &amp; Add Context
+                            </button>
                         </div>
                     </div>
 
                     <div id="view-step-4" class="step-view">
+                        <div id="auto-notice-4" class="auto-proceed-notice hidden"><i class="fa-solid fa-bolt"></i> Human approval is off — actions will execute automatically.</div>
                         <div class="stats-grid mb-4">
                             <div class="stat-card">
                                 <p class="eyebrow">Escalation trigger</p>
@@ -261,34 +369,41 @@
                         </div>
 
                         <div class="grid-2">
-                            <div class="payload-card shell-inset">
-                                <div class="section-head">
+                            <!-- Supplier email card -->
+                            <div class="message-card">
+                                <div class="message-card-header">
+                                    <span class="message-icon"><i class="fa-solid fa-envelope"></i></span>
                                     <div>
                                         <p class="eyebrow">Supplier communication</p>
-                                        <h3>Drafted Outreach</h3>
+                                        <strong>Drafted Outreach Email</strong>
                                     </div>
+                                    <span class="message-badge">Draft</span>
                                 </div>
-                                <pre id="s4-email" class="code-block"></pre>
+                                <p id="s4-email" class="message-body"></p>
                             </div>
 
-                            <div class="payload-card shell-inset">
-                                <div class="section-head">
+                            <!-- Executive alert card -->
+                            <div class="message-card message-card--alert">
+                                <div class="message-card-header">
+                                    <span class="message-icon"><i class="fa-solid fa-bell"></i></span>
                                     <div>
                                         <p class="eyebrow">Executive escalation</p>
-                                        <h3>Ops Brief</h3>
+                                        <strong>Ops Brief</strong>
                                     </div>
+                                    <span class="message-badge message-badge--warning">Priority</span>
                                 </div>
-                                <pre id="s4-alert" class="code-block"></pre>
+                                <p id="s4-alert" class="message-body"></p>
                             </div>
                         </div>
 
                         <div class="action-bar">
-                            <button class="btn btn-success" onclick="executeActions()">Approve & Execute Actions <i class="fa-solid fa-check"></i></button>
-                            <button class="btn btn-outline" onclick="openCustomizeModal(4)"><i class="fa-solid fa-pen"></i> Decline & Customize</button>
+                            <button class="btn btn-success" onclick="executeActions()">Approve &amp; Execute Actions <i class="fa-solid fa-check"></i></button>
+                            <button class="btn btn-outline" onclick="openCustomizeModal(4)"><i class="fa-solid fa-pen"></i> Decline &amp; Customize</button>
                         </div>
                     </div>
 
                     <div id="view-step-5" class="step-view">
+                        <div id="auto-notice-5" class="auto-proceed-notice hidden"><i class="fa-solid fa-bolt"></i> Human approval is off — this step will auto-proceed.</div>
                         <div class="feature-card feature-primary mb-4">
                             <div class="card-head">
                                 <div>
@@ -326,6 +441,7 @@
                     </div>
 
                     <div id="view-step-6" class="step-view">
+                        <div id="auto-notice-6" class="auto-proceed-notice hidden"><i class="fa-solid fa-bolt"></i> Human approval is off for this final step.</div>
                         <div class="feature-card feature-primary mb-4">
                             <div class="card-head">
                                 <div>
@@ -334,7 +450,7 @@
                                 </div>
                                 <div class="card-icon"><i class="fa-solid fa-shield-heart"></i></div>
                             </div>
-                            <pre id="s6-trace" class="code-block"></pre>
+                            <p id="s6-trace" class="trace-prose"></p>
                         </div>
 
                         <div class="grid-3">
@@ -365,7 +481,7 @@
                                         <h3>Bias & constraints</h3>
                                     </div>
                                 </div>
-                                <div id="s6-validation" class="text-box">-</div>
+                                <ul id="s6-validation" class="bullet-list"></ul>
                             </div>
                         </div>
 
@@ -400,7 +516,71 @@
         </main>
     </div>
 
+    <!-- ── Settings Modal ─────────────────────────────────────────── -->
+    <div id="settings-modal" class="modal-overlay hidden" onclick="onSettingsOverlayClick(event)">
+        <div class="modal settings-modal shell-panel">
+            <div class="modal-header">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <div class="settings-header-icon"><i class="fa-solid fa-gear"></i></div>
+                    <div>
+                        <h3 style="margin:0;">Company Configuration</h3>
+                        <p class="eyebrow" style="margin:0;">Upload files so the AI knows your inventory, parts &amp; routes</p>
+                    </div>
+                </div>
+                <button type="button" class="modal-close" onclick="closeSettings()">&times;</button>
+            </div>
+
+            <!-- Upload zone -->
+            <div id="settings-upload-zone" class="upload-zone" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onFileDrop(event)" onclick="document.getElementById('settings-file-input').click()">
+                <div class="upload-zone-inner">
+                    <div class="upload-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                    <p class="upload-title">Drag &amp; drop company files here</p>
+                    <p class="upload-sub">Supports CSV, XLSX, PDF, TXT, JSON — ERP exports, supplier lists, BOM sheets, shipping routes</p>
+                    <button type="button" class="btn btn-secondary" style="margin-top:10px;" onclick="event.stopPropagation(); document.getElementById('settings-file-input').click()">
+                        <i class="fa-solid fa-folder-open"></i> Browse Files
+                    </button>
+                </div>
+                <input type="file" id="settings-file-input" multiple accept=".csv,.xlsx,.pdf,.txt,.json,.xls" style="display:none" onchange="onFileSelect(event)">
+            </div>
+
+            <!-- Uploaded files list -->
+            <div id="settings-file-list" class="settings-file-list hidden"></div>
+
+            <!-- Process button -->
+            <div id="settings-process-row" class="settings-process-row hidden">
+                <div id="settings-file-count" class="settings-file-count"></div>
+                <button type="button" class="btn btn-primary" id="settings-process-btn" onclick="processFiles()">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Analyse with AI
+                </button>
+            </div>
+
+            <!-- Progress / analysis area -->
+            <div id="settings-progress" class="settings-progress hidden">
+                <div class="progress-header">
+                    <span class="progress-label" id="settings-progress-label">Reading files...</span>
+                    <span class="progress-pct" id="settings-progress-pct">0%</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill" id="settings-progress-fill" style="width:0%"></div>
+                </div>
+                <div id="settings-log" class="settings-log"></div>
+            </div>
+
+            <!-- Extracted knowledge summary (shown after processing) -->
+            <div id="settings-summary" class="settings-summary hidden">
+                <div class="summary-header">
+                    <i class="fa-solid fa-circle-check" style="color:var(--success);"></i>
+                    <strong>AI extraction complete</strong>
+                    <span class="summary-badge" id="settings-summary-badge"></span>
+                </div>
+                <div class="summary-grid" id="settings-summary-grid"></div>
+                <p class="summary-note"><i class="fa-solid fa-info-circle"></i> This data is now loaded into the agent's context for this session.</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Decline & Customize Modal (reused for all steps) -->
+
     <div id="customize-modal" class="modal-overlay hidden">
         <div class="modal shell-panel">
             <div class="modal-header">

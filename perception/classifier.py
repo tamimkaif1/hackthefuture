@@ -16,20 +16,37 @@ from gemini_service import get_gemini_chat
 
 
 def _mock_assessment(news: NewsSignal, inventory_context: List[ERPInventorySnapshot]) -> SupplyRiskAssessment:
-    """Deterministic mock assessment (no API)."""
+    """Deterministic mock assessment (no API). Distinct scores per event type."""
     affected = [p.part_id for p in inventory_context] if inventory_context else []
     if not affected and news.location:
         affected = ["IC-7NM-001"]  # fallback for demo
+
+    # Assign distinct risk scores based on headline keywords for visual variety
+    headline_lower = news.headline.lower()
+    if any(w in headline_lower for w in ["typhoon", "hurricane", "earthquake", "flood"]):
+        risk_score, probability, impact = 9, "High", "High"
+        mitigation = "Immediately activate backup suppliers; expedite air freight for critical parts."
+    elif any(w in headline_lower for w in ["fire", "explosion", "factory", "fab"]):
+        risk_score, probability, impact = 8, "High", "High"
+        mitigation = "Expedite alternate shipping or tap secondary suppliers."
+    elif any(w in headline_lower for w in ["strike", "red sea", "canal", "geopolit", "sanction"]):
+        risk_score, probability, impact = 6, "Medium", "Medium"
+        mitigation = "Monitor rerouting options; reassess lead times."
+    else:
+        risk_score, probability, impact = 5, "Medium", "Medium"
+        mitigation = "Monitor situation and prepare contingency plans."
+
     return SupplyRiskAssessment(
         signal_id=news.id,
         news_summary=f"Mock summary: Disruption at {news.location or 'region'} impacting {news.headline}.",
-        risk_score=8,
-        probability="High",
-        impact_level="High",
+        risk_score=risk_score,
+        probability=probability,
+        impact_level=impact,
         affected_parts=affected,
-        recommended_mitigation="Expedite alternate shipping or tap secondary suppliers.",
+        recommended_mitigation=mitigation,
         rationale="Mock: Event impacts primary supplier location; buffer and lead times indicate high exposure.",
     )
+
 
 
 class RiskClassifier:

@@ -120,6 +120,39 @@ def api_step1_perception():
     }
 
 
+@app.get("/api/step1_all_risks")
+def api_step1_all_risks():
+    """Layer 1: Classify ALL mock news signals and return as an array for bubble visualization."""
+    news_parser = NewsParser()
+    erp = ERPMockConnector()
+    classifier = RiskClassifier()
+    all_signals = news_parser.fetch_all_news()
+    results = []
+    for news_signal in all_signals:
+        location_keyword = (news_signal.location or "").split(",")[0].strip() or ""
+        erp_context = erp.get_parts_by_location(location_keyword) if location_keyword else erp.get_inventory_snapshot()
+        supplier_health = compute_supplier_health_scores(erp_context)
+        supplier_health_summary = format_supplier_health_for_summary(supplier_health)
+        assessment = classifier.assess_risk(news_signal, erp_context)
+        if not assessment:
+            continue
+        perception_output = to_perception_output(assessment, news_signal, erp_context)
+        manufacturer_profile = get_manufacturer_profile(erp_context)
+        results.append({
+            "assessment": assessment.model_dump(),
+            "perception_output": perception_output.model_dump(),
+            "manufacturer_profile": manufacturer_profile.model_dump(),
+            "news_headline": news_signal.headline,
+            "news_content": news_signal.content,
+            "news_source": news_signal.source,
+            "news_location": news_signal.location or "",
+            "erp_context_size": len(erp_context),
+            "supplier_health_summary": supplier_health_summary,
+        })
+    return {"risks": results}
+
+
+
 @app.post("/api/step1_customize")
 def api_step1_customize(payload: dict):
     """Layer 1: Revise assessment based on user's custom prompt."""
@@ -150,11 +183,30 @@ def api_step2_risk(payload: dict):
 def api_step3_plan(payload: dict):
     """Layer 3: Mohid plan + Tamim options. Returns mohid_plan, planning_response, tamim_options."""
     assessment_dict = payload["assessment"]
-    risk_assessment = payload["risk_assessment"]
+    risk_assessment = payload.get("risk_assessment") or {}
     custom_prompt = (payload.get("custom_prompt") or "").strip() or None
     assessment = SupplyRiskAssessment(**assessment_dict)
     planner = DecisionEngine()
-    mohid_plan = planner.formulate_plan(assessment, layer2_risk_data=risk_assessment, custom_prompt=custom_prompt)
+    mohid_plan = planner.formulate_plan(assessment, layer2_risk_data=risk_assessment or None, custom_prompt=custom_prompt)
+
+    # Build a fallback RiskAssessmentResponse if step 2 was skipped or risk_assessment is null
+    if not risk_assessment:
+        score = assessment_dict.get("risk_score", 7)
+        risk_assessment = {
+            "event_type": assessment_dict.get("signal_id", "unknown"),
+            "affected_part": (assessment_dict.get("affected_parts") or ["unknown"])[0]
+                if isinstance(assessment_dict.get("affected_parts"), list)
+                else str(assessment_dict.get("affected_parts", "unknown")),
+            "disruption_probability": 0.85,
+            "delay_days": 30,
+            "inventory_days": 30,
+            "downtime_days": max(0, 30 - 30),
+            "revenue_at_risk": score * 500_000,
+            "sla_penalty_risk": score * 100_000,
+            "total_financial_exposure": score * 600_000,
+            "risk_level": "high" if score >= 7 else "medium",
+        }
+
     risk_response = RiskAssessmentResponse(**risk_assessment)
     tamim_response = simulate_plan_options(risk_response)
     planning_response = _mitigation_plan_to_planning_response(mohid_plan)
@@ -165,13 +217,37 @@ def api_step3_plan(payload: dict):
     }
 
 
+
 @app.post("/api/step4_actions_generate")
 def api_step4_actions_generate(payload: dict):
     """Layer 4: Generate actions from manufacturer_profile, risk_assessment, planning_response."""
+    # Guard: risk_assessment may be null if step 2 was skipped
+    raw_risk = payload.get("risk_assessment") or {
+        "event_type": "shipping_delay", "affected_part": "MECH-VALVE-202",
+        "disruption_probability": 0.85, "delay_days": 30, "inventory_days": 30,
+        "downtime_days": 0, "revenue_at_risk": 5_000_000,
+        "sla_penalty_risk": 1_000_000, "total_financial_exposure": 6_000_000,
+        "risk_level": "high",
+    }
+
+    # Guard: planning_response may be partial (missing 'options' list)
+    raw_plan = payload.get("planning_response") or {}
+    if "options" not in raw_plan or not raw_plan["options"]:
+        raw_plan["options"] = [{
+            "name": raw_plan.get("recommended_option", "Expedite alternate freight"),
+            "mitigation_cost": raw_plan.get("expected_cost_usd", 500_000),
+            "resulting_downtime_days": 0,
+            "revenue_saved": 4_000_000,
+            "penalty_saved": 800_000,
+            "net_benefit": 4_300_000,
+        }]
+    if "recommended_option" not in raw_plan:
+        raw_plan["recommended_option"] = raw_plan["options"][0]["name"]
+
     req = ActionRequest(
         manufacturer_profile=ManufacturerProfile(**payload["manufacturer_profile"]),
-        risk_assessment=RiskAssessmentResponse(**payload["risk_assessment"]),
-        planning_response=PlanningResponse(**payload["planning_response"]),
+        risk_assessment=RiskAssessmentResponse(**raw_risk),
+        planning_response=PlanningResponse(**raw_plan),
     )
     actions = generate_actions(req)
     out = actions.model_dump()
@@ -182,6 +258,7 @@ def api_step4_actions_generate(payload: dict):
         out["executive_alert"] = prefix + out.get("executive_alert", "")
         out["po_adjustment_suggestion"] = prefix + out.get("po_adjustment_suggestion", "")
     return out
+
 
 
 @app.post("/api/step4_actions_execute")

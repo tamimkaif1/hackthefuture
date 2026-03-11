@@ -1,0 +1,118 @@
+[
+  {
+    "event_id": "611b624d-4f26-43b2-82e3-0f802f39b285",
+    "original_risk": {
+      "signal_id": "611b624d-4f26-43b2-82e3-0f802f39b285",
+      "news_summary": "Mock summary: Disruption at Shenzhen, China impacting Major typhoon hitting Port of Shenzhen.",
+      "risk_score": 8,
+      "probability": "High",
+      "impact_level": "High",
+      "affected_parts": [
+        "MECH-VALVE-202"
+      ],
+      "recommended_mitigation": "Expedite alternate shipping or tap secondary suppliers.",
+      "rationale": "Mock: Event impacts primary supplier location; buffer and lead times indicate high exposure."
+    },
+    "chosen_mitigation": {
+      "plan_id": "29876c12-f133-4dde-ae38-a5c56e5650ef",
+      "chosen_scenario": {
+        "scenario_id": "mock-plan",
+        "action_type": "Air freight critical components",
+        "estimated_cost_usd": 350000,
+        "service_level_impact": "Downtime reduced (mock); was 10 days",
+        "resilience_score": 7
+      },
+      "supplier_reallocation_target": "Alternate supplier",
+      "buffer_stock_adjustment": 2000,
+      "reasoning_tree": "Mock: Chose Air freight critical components based on financial exposure $6,000,000 and downtime 10 days."
+    },
+    "post_mortem_summary": "Mock: Event 'Mock summary: Disruption at Shenzhen, China impacting Major typhoon hitting Port...' was mitigated via Air freight critical components (cost $350,000). | Mock: Maintain buffer stock for critical parts; consider alternate suppliers for high-exposure regions."
+  },
+  {
+    "event_id": "13b49550-260e-4976-b625-0d4e24f1af1a",
+    "original_risk": {
+      "signal_id": "13b49550-260e-4976-b625-0d4e24f1af1a",
+      "news_summary": "Mock summary: Disruption at Hsinchu, Taiwan impacting Semiconductor Fab Fire in Taiwan.",
+      "risk_score": 8,
+      "probability": "High",
+      "impact_level": "High",
+      "affected_parts": [
+        "IC-7NM-001"
+      ],
+      "recommended_mitigation": "Expedite alternate shipping or tap secondary suppliers.",
+      "rationale": "Mock: Event impacts primary supplier location; buffer and lead times indicate high exposure."
+    },
+    "chosen_mitigation": {
+      "plan_id": "cb5917f6-51b6-4cdd-9568-a3645bddec6d",
+      "chosen_scenario": {
+        "scenario_id": "mock-plan",
+        "action_type": "Air freight critical components",
+        "estimated_cost_usd": 350000,
+        "service_level_impact": "Downtime reduced (mock); was 15 days",
+        "resilience_score": 5
+      },
+      "supplier_reallocation_target": "Alternate supplier",
+      "buffer_stock_adjustment": 2000,
+      "reasoning_tree": "Mock: Chose Air freight critical components based on financial exposure $9,000,000 and downtime 15 days."
+    },
+    "post_mortem_summary": "Mock: Event 'Mock summary: Disruption at Hsinchu, Taiwan impacting Semiconductor Fab Fire in ...' was mitigated via Air freight critical components (cost $350,000). | Mock: Maintain buffer stock for critical parts; consider alternate suppliers for high-exposure regions."
+  },
+  {
+    "event_id": "982fffb8-ec03-49fa-8a4c-0f3659374bc9",
+    "original_risk": {
+      "signal_id": "982fffb8-ec03-49fa-8a4c-0f3659374bc9",
+      "news_summary": "Mock summary: Disruption at Shenzhen, China impacting Major typhoon hitting Port of Shenzhen.",
+      "risk_score": 9,
+      "probability": "High",
+      "impact_level": "High",
+      "affected_parts": [
+        "MECH-VALVE-202"
+      ],
+      "recommended_mitigation": "Immediately activate backup suppliers; expedite air freight for critical parts.",
+      "rationale": "Mock: Event impacts primary supplier location; buffer and lead times indicate high exposure."
+    },
+    "chosen_mitigation": {
+      "plan_id": "ab8c7891-be79-4db0-8903-55edf533f791",
+      "chosen_scenario": {
+        "scenario_id": "mock-plan",
+        "action_type": "Air freight critical components",
+        "estimated_cost_usd": 350000,
+        "service_level_impact": "Downtime reduced (mock); was 10 days",
+        "resilience_score": 7
+      },
+      "supplier_reallocation_target": "Alternate supplier",
+      "buffer_stock_adjustment": 2000,
+      "reasoning_tree": "Mock: Chose Air freight critical components based on financial exposure $6,000,000 and downtime 10 days."
+    },
+    "post_mortem_summary": "Mock: Event 'Mock summary: Disruption at Shenzhen, China impacting Major typhoon hitting Port...' was mitigated via Air freight critical components (cost $350,000). | Mock: Maintain buffer stock for critical parts; consider alternate suppliers for high-exposure regions."
+  },
+  {
+    "event_id": "b2ba91c8-c413-4864-976e-91006b76bec2",
+    "original_risk": {
+      "signal_id": "b2ba91c8-c413-4864-976e-91006b76bec2",
+      "news_summary": "Mock summary: Disruption at Shenzhen, China impacting Major typhoon hitting Port of Shenzhen.",
+      "risk_score": 9,
+      "probability": "High",
+      "impact_level": "High",
+      "affected_parts": [
+        "MECH-VALVE-202"
+      ],
+      "recommended_mitigation": "Immediately activate backup suppliers; expedite air freight for critical parts.",
+      "rationale": "Mock: Event impacts primary supplier location; buffer and lead times indicate high exposure."
+    },
+    "chosen_mitigation": {
+      "plan_id": "da420be6-fe41-4de0-b2bb-3b4da979f4b3",
+      "chosen_scenario": {
+        "scenario_id": "mock-plan",
+        "action_type": "Air freight critical components",
+        "estimated_cost_usd": 350000,
+        "service_level_impact": "Downtime reduced (mock); was 10 days",
+        "resilience_score": 7
+      },
+      "supplier_reallocation_target": "Alternate supplier",
+      "buffer_stock_adjustment": 2000,
+      "reasoning_tree": "Mock: Chose Air freight critical components based on financial exposure $6,000,000 and downtime 10 days."
+    },
+    "post_mortem_summary": "Mock: Event 'Mock summary: Disruption at Shenzhen, China impacting Major typhoon hitting Port...' was mitigated via Air freight critical components (cost $350,000). | Mock: Maintain buffer stock for critical parts; consider alternate suppliers for high-exposure regions."
+  }
+]
